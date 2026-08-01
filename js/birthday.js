@@ -1,5 +1,6 @@
 /* =========================================================
    BIRTHDAY EXPERIENCE
+   FINAL VERSION
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -25,98 +26,212 @@ document.addEventListener("DOMContentLoaded", () => {
     let alreadyBlown = false;
 
 
-    blowButton.addEventListener("click", async () => {
+    /* ---------------------------------------------------------
+       CREATE CONTINUE BUTTON
+    --------------------------------------------------------- */
 
-        if (alreadyBlown) {
-            return;
-        }
+    const continueButton =
+        document.createElement("a");
 
-        alreadyBlown = true;
+    continueButton.href =
+        "pages/memories.html";
 
+    continueButton.className =
+        "primary-button birthday-continue-button";
 
-        /* ---------------------------------------------
-           BUTTON
-        --------------------------------------------- */
+    continueButton.innerHTML = `
+        Continue
+        <span>→</span>
+    `;
 
-        blowButton.disabled = true;
+    continueButton.style.opacity = "0";
+    continueButton.style.visibility = "hidden";
+    continueButton.style.transform =
+        "translateY(15px)";
 
-        blowButton.style.opacity = "0";
-
-        blowButton.style.transform = "translateY(10px)";
-
-
-        /* ---------------------------------------------
-           WISH TEXT
-        --------------------------------------------- */
-
-        if (wishText) {
-
-            wishText.style.transition = "600ms ease";
-
-            wishText.style.opacity = "0";
-
-        }
+    continueButton.style.transition =
+        "opacity 800ms ease, transform 800ms ease";
 
 
-        /* ---------------------------------------------
-           CANDLES
-        --------------------------------------------- */
+    /* Put button inside celebration content */
 
-        candles.forEach((candle, index) => {
+    if (celebrationOverlay) {
 
-            setTimeout(() => {
+        const celebrationContent =
+            celebrationOverlay.querySelector(
+                ".celebration-content"
+            );
 
-                candle.classList.add("blown");
+        if (celebrationContent) {
 
-            }, index * 100);
-
-        });
-
-
-        /* ---------------------------------------------
-           BLOW EFFECT
-        --------------------------------------------- */
-
-        document.body.classList.add("blowing-screen");
-
-
-        /* ---------------------------------------------
-           MUSIC
-        --------------------------------------------- */
-
-        if (window.BirthdayMusic) {
-
-            await window.BirthdayMusic.playBirthday();
+            celebrationContent.appendChild(
+                continueButton
+            );
 
         }
 
+    }
 
-        /* ---------------------------------------------
-           CELEBRATION
-        --------------------------------------------- */
 
-        setTimeout(() => {
+    /* ---------------------------------------------------------
+       CONTINUE BUTTON
+    --------------------------------------------------------- */
 
-            if (celebrationOverlay) {
+    continueButton.addEventListener(
+        "click",
+        async (event) => {
 
-                celebrationOverlay.classList.add("active");
+            event.preventDefault();
+
+            /*
+               Birthday music remains playing
+               until this exact moment.
+            */
+
+            if (window.BirthdayMusic) {
+
+                await window.BirthdayMusic
+                    .stopBirthday();
+
+                /*
+                   Start memories before navigation.
+                   The browser interaction that clicked
+                   Continue is already valid user interaction.
+                */
+
+                sessionStorage.setItem(
+                    "startMemoriesMusic",
+                    "true"
+                );
 
             }
-
-        }, 800);
-
-
-        /* ---------------------------------------------
-           NEXT PAGE
-        --------------------------------------------- */
-
-        setTimeout(() => {
 
             window.location.href =
                 "pages/memories.html";
 
-        }, 6500);
+        }
+    );
 
-    });
+
+    /* ---------------------------------------------------------
+       BLOW CANDLES
+    --------------------------------------------------------- */
+
+    blowButton.addEventListener(
+        "click",
+        () => {
+
+            if (alreadyBlown) {
+                return;
+            }
+
+            alreadyBlown = true;
+
+
+            /* BUTTON */
+
+            blowButton.disabled = true;
+
+            blowButton.style.transition =
+                "opacity 500ms ease, transform 500ms ease";
+
+            blowButton.style.opacity = "0";
+
+            blowButton.style.transform =
+                "translateY(10px)";
+
+
+            /* WISH TEXT */
+
+            if (wishText) {
+
+                wishText.style.transition =
+                    "600ms ease";
+
+                wishText.style.opacity =
+                    "0";
+
+            }
+
+
+            /* CANDLES */
+
+            candles.forEach(
+                (candle, index) => {
+
+                    setTimeout(
+                        () => {
+
+                            candle.classList.add(
+                                "blown"
+                            );
+
+                        },
+                        index * 120
+                    );
+
+                }
+            );
+
+
+            /* SCREEN EFFECT */
+
+            document.body.classList.add(
+                "blowing-screen"
+            );
+
+
+            /*
+               IMPORTANT:
+               DO NOT TOUCH birthdayMusic.
+
+               It is already playing from page load.
+            */
+
+
+            /* CELEBRATION */
+
+            setTimeout(
+                () => {
+
+                    if (celebrationOverlay) {
+
+                        celebrationOverlay.classList.add(
+                            "active"
+                        );
+
+                    }
+
+                },
+                850
+            );
+
+
+            /* SHOW CONTINUE */
+
+            setTimeout(
+                () => {
+
+                    continueButton.style.visibility =
+                        "visible";
+
+                    requestAnimationFrame(
+                        () => {
+
+                            continueButton.style.opacity =
+                                "1";
+
+                            continueButton.style.transform =
+                                "translateY(0)";
+
+                        }
+                    );
+
+                },
+                3000
+            );
+
+        }
+    );
 
 });

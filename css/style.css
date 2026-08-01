@@ -1233,3 +1233,746 @@ img {
     background: rgba(215,184,122,.25);
     color: white;
 }
+/* =========================================================
+   FINAL POLISH
+   BIRTHDAY CONTINUE + DEVELOPER EXPERIENCE
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   BIRTHDAY CONTINUE BUTTON
+--------------------------------------------------------- */
+
+.birthday-continue-button {
+    position: relative;
+    z-index: 5;
+    margin-top: 35px;
+}
+
+
+/* ---------------------------------------------------------
+   DEVELOPER BUTTON
+--------------------------------------------------------- */
+
+.developer-badge {
+    height: 48px;
+    min-width: 118px;
+    padding: 0 15px;
+    gap: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(18,16,15,.94),
+            rgba(8,7,7,.94)
+        );
+
+    border:
+        1px solid rgba(215,184,122,.34);
+
+    border-radius: 12px;
+
+    backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.05);
+
+    transition:
+        transform .4s ease,
+        border-color .4s ease,
+        box-shadow .4s ease;
+}
+
+
+.developer-badge:hover {
+
+    transform:
+        translateY(-4px);
+
+    border-color:
+        rgba(215,184,122,.8);
+
+    box-shadow:
+        0 15px 45px rgba(0,0,0,.5),
+        0 0 25px rgba(215,184,122,.08);
+
+}
+
+
+.developer-star {
+
+    font-size: 11px;
+    color: var(--gold);
+
+}
+
+
+.developer-badge-copy {
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1;
+
+}
+
+
+.developer-badge-copy small {
+
+    font-size: 6px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+
+}
+
+
+.developer-badge-copy strong {
+
+    font-size: 10px;
+    letter-spacing: 3px;
+    font-weight: 500;
+    color: var(--text);
+
+}
+
+
+.developer-arrow {
+
+    font-size: 13px;
+    color: var(--gold);
+    transition: transform .3s ease;
+
+}
+
+
+.developer-badge:hover .developer-arrow {
+
+    transform:
+        translate(2px,-2px);
+
+}
+
+
+/* ---------------------------------------------------------
+   DEVELOPER OVERLAY
+--------------------------------------------------------- */
+
+.developer-overlay {
+
+    overflow-y: auto;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(185,135,145,.09),
+            transparent 35%
+        ),
+        #050505;
+
+}
+
+
+.developer-content {
+
+    width: min(
+        700px,
+        calc(100% - 30px)
+    );
+
+    padding:
+        60px 0;
+
+}
+
+
+.developer-countdown {
+
+    text-shadow:
+        0 0 35px rgba(215,184,122,.2);
+
+}
+
+
+.developer-card {
+
+    width: 100%;
+    max-width: 600px;
+
+    margin: auto;
+
+    padding:
+        35px 30px 40px;
+
+    border:
+        1px solid rgba(215,184,122,.16);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.045),
+            rgba(255,255,255,.018)
+        );
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.5);
+
+    backdrop-filter:
+        blur(20px);
+
+}
+
+
+.developer-card-topline {
+
+    font-size: 7px;
+    letter-spacing: 4px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+
+}
+
+
+.developer-photo {
+
+    width: 165px;
+    height: 165px;
+
+    margin:
+        0 auto 28px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(215,184,122,.5);
+
+    padding: 5px;
+
+    box-shadow:
+        0 0 40px rgba(215,184,122,.07);
+
+}
+
+
+.developer-card h2 {
+
+    font-size:
+        clamp(48px, 9vw, 70px);
+
+    letter-spacing:
+        -1px;
+
+}
+
+
+.developer-divider {
+
+    width: 45px;
+    height: 1px;
+
+    background:
+        var(--gold);
+
+    margin:
+        28px auto;
+
+}
+
+
+.developer-message {
+
+    max-width: 500px;
+
+    margin: auto;
+
+    color:
+        var(--text-soft);
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        clamp(18px, 3vw, 22px);
+
+    line-height:
+        1.65;
+
+    font-style:
+        italic;
+
+}
+
+
+.developer-rights {
+
+    margin-top: 30px;
+
+    line-height:
+        1.8;
+
+}
+
+
+.developer-contact {
+
+    margin-top: 30px;
+
+}
+
+
+.developer-contact p {
+
+    font-size: 12px;
+    letter-spacing: 1px;
+
+}
+
+
+.developer-close {
+
+    width: 45px;
+    height: 45px;
+
+    top: 22px;
+    right: 22px;
+
+    border:
+        1px solid rgba(255,255,255,.1);
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,.035);
+
+    color:
+        var(--text-soft);
+
+    font-size:
+        26px;
+
+    line-height:
+        1;
+
+    transition:
+        .3s ease;
+
+}
+
+
+.developer-close:hover {
+
+    border-color:
+        var(--gold);
+
+    color:
+        var(--gold);
+
+    transform:
+        rotate(90deg);
+
+}
+
+
+/* ---------------------------------------------------------
+   DEVELOPER OPEN EFFECT
+--------------------------------------------------------- */
+
+body.developer-open > *:not(.developer-overlay) {
+
+    animation:
+        screenWave .7s ease;
+
+}
+
+
+@media (max-width: 600px) {
+
+    .developer-badge {
+
+        right: 14px;
+        bottom: 14px;
+
+        min-width: 108px;
+        height: 44px;
+
+    }
+
+
+    .developer-content {
+
+        width:
+            calc(100% - 20px);
+
+        padding:
+            65px 0 30px;
+
+    }
+
+
+    .developer-card {
+
+        padding:
+            28px 18px 32px;
+
+    }
+
+
+    .developer-photo {
+
+        width: 135px;
+        height: 135px;
+
+    }
+
+
+    .developer-message {
+
+        font-size: 18px;
+        line-height: 1.6;
+
+    }
+
+}
+/* =========================================================
+   FINAL BIRTHDAY LETTER
+========================================================= */
+
+.birthday-date {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 18px;
+
+    margin:
+        15px auto 8px;
+
+}
+
+
+.date-number {
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        clamp(65px, 11vw, 105px);
+
+    font-weight:
+        400;
+
+    line-height:
+        .8;
+
+    color:
+        var(--text);
+
+}
+
+
+.date-divider {
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        50px;
+
+    color:
+        var(--gold);
+
+    opacity:
+        .7;
+
+}
+
+
+.date-caption {
+
+    text-align:
+        center;
+
+    color:
+        var(--text-muted);
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        4px;
+
+    text-transform:
+        uppercase;
+
+    margin-top:
+        18px;
+
+}
+
+
+/* ---------------------------------------------------------
+   LETTER
+--------------------------------------------------------- */
+
+.birthday-letter {
+
+    width:
+        min(700px, 100%);
+
+    margin:
+        75px auto 0;
+
+    padding:
+        55px 50px;
+
+    border-top:
+        1px solid rgba(215,184,122,.18);
+
+    border-bottom:
+        1px solid rgba(215,184,122,.18);
+
+    position:
+        relative;
+
+}
+
+
+.birthday-letter::before {
+
+    content:
+        "“";
+
+    position:
+        absolute;
+
+    top:
+        5px;
+
+    left:
+        -5px;
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        100px;
+
+    color:
+        rgba(215,184,122,.12);
+
+    line-height:
+        1;
+
+}
+
+
+.birthday-letter p {
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        21px;
+
+    line-height:
+        1.75;
+
+    color:
+        var(--text-soft);
+
+    margin-bottom:
+        27px;
+
+}
+
+
+.birthday-letter .letter-opening {
+
+    font-size:
+        32px;
+
+    color:
+        var(--text);
+
+    margin-bottom:
+        35px;
+
+}
+
+
+.birthday-letter strong {
+
+    color:
+        var(--gold);
+
+    font-weight:
+        500;
+
+}
+
+
+.birthday-letter .letter-highlight {
+
+    margin:
+        55px 0;
+
+    padding:
+        28px 20px;
+
+    border-top:
+        1px solid rgba(215,184,122,.2);
+
+    border-bottom:
+        1px solid rgba(215,184,122,.2);
+
+    color:
+        var(--text);
+
+    text-align:
+        center;
+
+    font-size:
+        25px;
+
+    font-style:
+        italic;
+
+}
+
+
+.birthday-letter .letter-ending {
+
+    margin-top:
+        45px;
+
+    color:
+        var(--text);
+
+}
+
+
+.letter-signature {
+
+    margin-top:
+        45px;
+
+    text-align:
+        right;
+
+    color:
+        var(--text-muted);
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        17px;
+
+    font-style:
+        italic;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* ---------------------------------------------------------
+   FINAL PAGE SPACING
+--------------------------------------------------------- */
+
+.final-page .final-message {
+
+    width:
+        min(850px, 100%);
+
+    padding:
+        150px 0 100px;
+
+}
+
+
+.final-page .replay-button {
+
+    margin-top:
+        65px;
+
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+    .birthday-letter {
+
+        margin-top:
+            55px;
+
+        padding:
+            40px 20px;
+
+    }
+
+
+    .birthday-letter p {
+
+        font-size:
+            19px;
+
+        line-height:
+            1.7;
+
+    }
+
+
+    .birthday-letter .letter-opening {
+
+        font-size:
+            29px;
+
+    }
+
+
+    .birthday-letter .letter-highlight {
+
+        font-size:
+            22px;
+
+        margin:
+            40px 0;
+
+    }
+
+
+    .letter-signature {
+
+        text-align:
+            center;
+
+        font-size:
+            15px;
+
+    }
+
+
+    .final-page .final-message {
+
+        padding:
+            120px 0 70px;
+
+    }
+
+
+    .date-number {
+
+        font-size:
+            75px;
+
+    }
+
+}

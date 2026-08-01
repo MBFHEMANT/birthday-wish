@@ -1,35 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>One Last Thing — For You</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+        crossorigin
+    >
+
 
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/animations.css">
-    <link rel="stylesheet" href="../css/responsive.css">
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/animations.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/responsive.css"
+    >
 
 </head>
 
+
 <body class="inner-page final-page">
 
+
+    <!-- BACKGROUND -->
+
     <div class="ambient-background">
+
         <div class="ambient-glow glow-one"></div>
+
         <div class="ambient-glow glow-two"></div>
+
+        <div class="ambient-glow glow-three"></div>
+
     </div>
+
 
     <div id="particles"></div>
 
+
+    <!-- HEADER -->
 
     <header class="story-header">
 
@@ -37,60 +76,147 @@
             05 / 05
         </div>
 
+
         <div class="story-progress">
+
             <span class="progress-dot active"></span>
+
             <span class="progress-line"></span>
+
             <span class="progress-dot active"></span>
+
             <span class="progress-line"></span>
+
             <span class="progress-dot active"></span>
+
             <span class="progress-line"></span>
+
             <span class="progress-dot active"></span>
+
             <span class="progress-line"></span>
+
             <span class="progress-dot active"></span>
+
         </div>
 
     </header>
 
 
+    <!-- FINAL LETTER -->
+
     <main class="final-container">
 
         <section class="final-message">
+
 
             <span class="section-label final-label">
                 ONE LAST THING
             </span>
 
-            <div class="final-text">
 
-                <p class="final-line line-one">
-                    Before you leave...
+            <!-- DATE -->
+
+            <div class="birthday-date">
+
+                <span class="date-number">
+                    08
+                </span>
+
+                <span class="date-divider">
+                    /
+                </span>
+
+                <span class="date-number">
+                    08
+                </span>
+
+            </div>
+
+
+            <p class="date-caption">
+                A day worth remembering.
+            </p>
+
+
+            <!-- LETTER -->
+
+            <div class="birthday-letter">
+
+
+                <p class="letter-opening">
+                    Hey...
                 </p>
 
-                <p class="final-line line-two">
-                    I could have written a hundred things here.
+
+                <p>
+                    I don't really know how to put everything
+                    into the right words, so maybe I'll just
+                    keep this simple.
                 </p>
 
-                <p class="final-line line-three">
-                    But some things are better left between the lines.
+
+                <p>
+                    Today is your day, and somehow I wanted
+                    to make something that would stay with you
+                    a little longer than a normal birthday wish.
                 </p>
 
-                <p class="final-line line-four">
-                    So for now...
+
+                <p>
+                    You have lived through so many little
+                    chapters to become the person you are today.
+                    Some of them I know, some of them I don't,
+                    and some of them probably belong only to you.
                 </p>
 
-                <h1 class="final-birthday">
-                    Happy Birthday<span>.</span>
-                </h1>
 
-                <p class="final-wish">
-                    Keep smiling.<br>
-                    Keep growing.<br>
-                    Keep being you.
+                <p>
+                    But seeing those old pictures reminded me
+                    of something simple — every version of you
+                    was worth remembering.
                 </p>
 
-                <p class="final-last-line">
-                    May this year give you countless reasons to smile.
+
+                <p>
+                    So on <strong>08 / 08</strong>, I hope you
+                    remember that there are people who genuinely
+                    wish good things for you, even when they don't
+                    always know how to say it.
                 </p>
+
+
+                <p>
+                    I hope this year brings you moments that
+                    you'll want to keep forever, people who make
+                    ordinary days feel special, and enough reasons
+                    to smile even on the days that don't go
+                    exactly as planned.
+                </p>
+
+
+                <p>
+                    And whatever happens next, keep becoming
+                    the person you want to be.
+                </p>
+
+
+                <p class="letter-highlight">
+                    Some things don't need a name to be special.
+                </p>
+
+
+                <p class="letter-ending">
+                    Just keep smiling.
+                    <br>
+                    And have a beautiful 08 / 08.
+                </p>
+
+
+                <div class="letter-signature">
+                    — from someone who wanted to make
+                    this day a little more special
+                </div>
+
 
             </div>
 
@@ -99,27 +225,45 @@
                 href="../index.html"
                 class="primary-button replay-button"
             >
+
                 <span>↻</span>
+
                 Replay the story
+
             </a>
+
 
         </section>
 
     </main>
 
 
+    <!-- HMT DEVELOPER -->
+
     <button
         id="developerBadge"
         class="developer-badge"
         aria-label="Website developer information"
     >
-        <span class="developer-star">✦</span>
-        <span class="developer-badge-text">HMT</span>
+
+        <span class="developer-star">
+            ✦
+        </span>
+
+        <span class="developer-badge-text">
+            HMT
+        </span>
+
     </button>
 
 
+    <script src="../js/music.js"></script>
+
     <script src="../js/main.js"></script>
+
     <script src="../js/developer.js"></script>
 
+
 </body>
+
 </html>

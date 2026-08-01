@@ -1,53 +1,114 @@
 /* =========================================================
-   MUSIC CONTROLLER
+   HMT BIRTHDAY EXPERIENCE
+   GLOBAL MUSIC CONTROLLER
+   FINAL VERSION
 ========================================================= */
 
 (function () {
 
-    const introMusic =
-        document.getElementById("introMusic");
+    const STORAGE_KEY = "hmtBirthdayMusicState";
 
-    const birthdayMusic =
-        document.getElementById("birthdayMusic");
+    let birthdayMusic = document.getElementById("birthdayMusic");
+    let memoriesMusic = document.getElementById("memoriesMusic");
+    let introMusic = document.getElementById("introMusic");
 
-    const memoriesMusic =
-        document.getElementById("memoriesMusic");
+    const isRootPage =
+        !window.location.pathname.includes("/pages/");
+
+    const assetPrefix = isRootPage ? "" : "../";
+
+    /* ---------------------------------------------------------
+       CREATE MISSING AUDIO ELEMENTS
+    --------------------------------------------------------- */
+
+    function createAudioIfMissing(id, src, loop = false) {
+
+        let audio = document.getElementById(id);
+
+        if (audio) {
+            return audio;
+        }
+
+        audio = document.createElement("audio");
+
+        audio.id = id;
+        audio.preload = "auto";
+        audio.loop = loop;
+
+        const source = document.createElement("source");
+        source.src = assetPrefix + src;
+        source.type = "audio/mpeg";
+
+        audio.appendChild(source);
+        document.body.appendChild(audio);
+
+        return audio;
+    }
 
 
-    const fadeAudio = (
-        audio,
-        targetVolume,
-        duration = 1000
-    ) => {
+    /* ---------------------------------------------------------
+       AUDIO ELEMENTS
+    --------------------------------------------------------- */
+
+    if (!birthdayMusic && isRootPage) {
+        birthdayMusic = createAudioIfMissing(
+            "birthdayMusic",
+            "assets/music/birthday.mp3"
+        );
+    }
+
+    if (!memoriesMusic && !isRootPage) {
+        memoriesMusic = createAudioIfMissing(
+            "memoriesMusic",
+            "assets/music/memories.mp3",
+            true
+        );
+    }
+
+    if (!introMusic) {
+        introMusic = createAudioIfMissing(
+            "introMusic",
+            "assets/music/intro.mp3"
+        );
+    }
+
+
+    /* ---------------------------------------------------------
+       VOLUME
+    --------------------------------------------------------- */
+
+    const BIRTHDAY_VOLUME = 0.65;
+    const MEMORIES_VOLUME = 0.38;
+    const INTRO_VOLUME = 0.48;
+
+
+    /* ---------------------------------------------------------
+       FADE
+    --------------------------------------------------------- */
+
+    function fadeAudio(audio, targetVolume, duration = 700) {
 
         if (!audio) {
             return Promise.resolve();
         }
 
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
 
-            const startVolume =
-                audio.volume;
-
-            const difference =
-                targetVolume - startVolume;
-
-            const start =
-                performance.now();
-
+            const startVolume = audio.volume;
+            const difference = targetVolume - startVolume;
+            const startTime = performance.now();
 
             function step(now) {
 
                 const progress =
                     Math.min(
-                        (now - start) / duration,
+                        (now - startTime) / duration,
                         1
                     );
 
                 audio.volume =
                     startVolume +
                     difference * progress;
-
 
                 if (progress < 1) {
 
@@ -58,38 +119,52 @@
                     resolve();
 
                 }
-
             }
 
             requestAnimationFrame(step);
 
         });
 
-    };
+    }
 
 
-    const stopAudio = async (audio) => {
+    /* ---------------------------------------------------------
+       STOP
+    --------------------------------------------------------- */
+
+    async function stopAudio(audio, reset = true) {
 
         if (!audio) {
             return;
         }
 
-        await fadeAudio(audio, 0, 700);
+        try {
+
+            await fadeAudio(
+                audio,
+                0,
+                500
+            );
+
+        } catch (error) {}
 
         audio.pause();
 
-        audio.currentTime = 0;
+        if (reset) {
+            audio.currentTime = 0;
+        }
 
-    };
+    }
 
 
-    const playAudio = async (
-        audio,
-        volume = 0.6
-    ) => {
+    /* ---------------------------------------------------------
+       PLAY
+    --------------------------------------------------------- */
+
+    async function playAudio(audio, volume) {
 
         if (!audio) {
-            return;
+            return false;
         }
 
         audio.volume = 0;
@@ -101,114 +176,420 @@
             await fadeAudio(
                 audio,
                 volume,
-                1000
+                900
             );
+
+            return true;
 
         } catch (error) {
 
-            console.log(
-                "Audio playback waiting for user interaction."
-            );
+            return false;
 
         }
 
-    };
+    }
 
 
-    window.BirthdayMusic = {
+    /* ---------------------------------------------------------
+       SAVE MEMORY MUSIC POSITION
+    --------------------------------------------------------- */
 
-        async playIntro() {
+    function saveMemoriesPosition() {
 
-            if (birthdayMusic) {
-                await stopAudio(birthdayMusic);
+        if (!memoriesMusic) {
+            return;
+        }
+
+        try {
+
+            sessionStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    currentTime: memoriesMusic.currentTime,
+                    wasPlaying: !memoriesMusic.paused
+                })
+            );
+
+        } catch (error) {}
+
+    }
+
+
+    /* ---------------------------------------------------------
+       GET SAVED POSITION
+    --------------------------------------------------------- */
+
+    function getSavedMemoriesPosition() {
+
+        try {
+
+            const data =
+                sessionStorage.getItem(
+                    STORAGE_KEY
+                );
+
+            if (!data) {
+                return null;
             }
 
-            await playAudio(
-                introMusic,
-                0.45
+            return JSON.parse(data);
+
+        } catch (error) {
+
+            return null;
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       RESTORE MEMORY POSITION
+    --------------------------------------------------------- */
+
+    function restoreMemoriesPosition() {
+
+        if (!memoriesMusic) {
+            return;
+        }
+
+        const saved =
+            getSavedMemoriesPosition();
+
+        if (
+            saved &&
+            typeof saved.currentTime === "number"
+        ) {
+
+            try {
+
+                memoriesMusic.currentTime =
+                    saved.currentTime;
+
+            } catch (error) {}
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       BIRTHDAY MUSIC
+    --------------------------------------------------------- */
+
+    async function playBirthday() {
+
+        if (!birthdayMusic) {
+            return;
+        }
+
+        await stopAudio(
+            introMusic,
+            true
+        );
+
+        await stopAudio(
+            memoriesMusic,
+            false
+        );
+
+        birthdayMusic.loop = true;
+
+        await playAudio(
+            birthdayMusic,
+            BIRTHDAY_VOLUME
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       MEMORIES MUSIC
+    --------------------------------------------------------- */
+
+    async function playMemories() {
+
+        if (!memoriesMusic) {
+            return;
+        }
+
+        await stopAudio(
+            birthdayMusic,
+            false
+        );
+
+        await stopAudio(
+            introMusic,
+            true
+        );
+
+        restoreMemoriesPosition();
+
+        memoriesMusic.loop = true;
+
+        await playAudio(
+            memoriesMusic,
+            MEMORIES_VOLUME
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       RESUME MEMORIES
+    --------------------------------------------------------- */
+
+    async function resumeMemories() {
+
+        if (!memoriesMusic) {
+            return;
+        }
+
+        restoreMemoriesPosition();
+
+        memoriesMusic.loop = true;
+
+        await playAudio(
+            memoriesMusic,
+            MEMORIES_VOLUME
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       DEVELOPER MUSIC
+    --------------------------------------------------------- */
+
+    async function playDeveloperMusic() {
+
+        saveMemoriesPosition();
+
+        if (memoriesMusic) {
+
+            await fadeAudio(
+                memoriesMusic,
+                0,
+                500
             );
 
-        },
+            memoriesMusic.pause();
+
+        }
+
+        await stopAudio(
+            birthdayMusic,
+            false
+        );
+
+        await stopAudio(
+            introMusic,
+            true
+        );
+
+        await playAudio(
+            introMusic,
+            INTRO_VOLUME
+        );
+
+    }
 
 
-        async playBirthday() {
+    /* ---------------------------------------------------------
+       CLOSE DEVELOPER MUSIC
+    --------------------------------------------------------- */
 
-            await stopAudio(introMusic);
+    async function closeDeveloperMusic() {
 
-            await playAudio(
-                birthdayMusic,
-                0.65
-            );
+        await stopAudio(
+            introMusic,
+            true
+        );
 
-        },
+        if (memoriesMusic) {
 
+            restoreMemoriesPosition();
 
-        async playMemories() {
-
-            await stopAudio(introMusic);
-            await stopAudio(birthdayMusic);
+            memoriesMusic.loop = true;
 
             await playAudio(
                 memoriesMusic,
-                0.35
+                MEMORIES_VOLUME
             );
 
         }
 
-    };
+    }
 
 
-    /* -----------------------------------------------------
-       START INTRO MUSIC AFTER FIRST INTERACTION
-    ----------------------------------------------------- */
+    /* ---------------------------------------------------------
+       FIRST INTERACTION FALLBACK
+    --------------------------------------------------------- */
 
-    if (introMusic) {
+    function tryStartBirthdayMusic() {
 
-        const startMusic =
+        if (!isRootPage) {
+            return;
+        }
+
+        if (
+            birthdayMusic &&
+            birthdayMusic.paused
+        ) {
+
+            playBirthday();
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       ROOT PAGE: START BIRTHDAY MUSIC
+    --------------------------------------------------------- */
+
+    if (isRootPage) {
+
+        window.addEventListener(
+            "load",
             () => {
 
-                if (
-                    introMusic.paused &&
-                    !sessionStorage.getItem(
-                        "birthdayIntroPlayed"
-                    )
-                ) {
+                setTimeout(
+                    () => {
 
-                    window.BirthdayMusic.playIntro();
+                        playBirthday();
 
-                    sessionStorage.setItem(
-                        "birthdayIntroPlayed",
-                        "true"
-                    );
-
-                }
-
-                document.removeEventListener(
-                    "click",
-                    startMusic
+                    },
+                    250
                 );
 
-                document.removeEventListener(
-                    "touchstart",
-                    startMusic
-                );
-
-            };
+            }
+        );
 
 
         document.addEventListener(
-            "click",
-            startMusic,
+            "pointerdown",
+            tryStartBirthdayMusic,
             { once: true }
         );
 
+
         document.addEventListener(
-            "touchstart",
-            startMusic,
+            "keydown",
+            tryStartBirthdayMusic,
             { once: true }
         );
 
     }
 
+
+    /* ---------------------------------------------------------
+       INNER PAGES: RESTORE MEMORIES MUSIC
+    --------------------------------------------------------- */
+
+    if (!isRootPage) {
+
+        window.addEventListener(
+            "load",
+            () => {
+
+                setTimeout(
+                    () => {
+
+                        resumeMemories();
+
+                    },
+                    250
+                );
+
+            }
+        );
+
+
+        document.addEventListener(
+            "pointerdown",
+            () => {
+
+                if (
+                    memoriesMusic &&
+                    memoriesMusic.paused
+                ) {
+
+                    resumeMemories();
+
+                }
+
+            },
+            { once: true }
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       SAVE BEFORE LEAVING PAGE
+    --------------------------------------------------------- */
+
+    window.addEventListener(
+        "beforeunload",
+        saveMemoriesPosition
+    );
+
+
+    document.addEventListener(
+        "visibilitychange",
+        () => {
+
+            if (
+                document.visibilityState === "hidden"
+            ) {
+
+                saveMemoriesPosition();
+
+            }
+
+        }
+    );
+
+
+    /* ---------------------------------------------------------
+       PUBLIC API
+    --------------------------------------------------------- */
+
+    window.BirthdayMusic = {
+
+        playBirthday,
+
+        playMemories,
+
+        resumeMemories,
+
+        playDeveloperMusic,
+
+        closeDeveloperMusic,
+
+        saveMemoriesPosition,
+
+        stopBirthday: async function () {
+
+            await stopAudio(
+                birthdayMusic,
+                false
+            );
+
+        },
+
+        stopMemories: async function () {
+
+            saveMemoriesPosition();
+
+            await stopAudio(
+                memoriesMusic,
+                false
+            );
+
+        }
+
+    };
 
 })();
