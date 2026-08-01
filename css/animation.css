@@ -1,0 +1,177 @@
+/* =========================================================
+   HMT BIRTHDAY EXPERIENCE
+   ANIMATIONS
+========================================================= */
+
+@keyframes loaderSpin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+@keyframes flameFlicker {
+
+    0% {
+        transform:
+            translateX(-50%)
+            scaleY(1)
+            rotate(-2deg);
+    }
+
+    100% {
+        transform:
+            translateX(-50%)
+            scaleY(1.08)
+            rotate(2deg);
+    }
+
+}
+
+
+@keyframes particleFloat {
+
+    0% {
+        transform:
+            translateY(110vh)
+            translateX(0)
+            scale(.5);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: .6;
+    }
+
+    90% {
+        opacity: .4;
+    }
+
+    100% {
+        transform:
+            translateY(-10vh)
+            translateX(50px)
+            scale(1);
+        opacity: 0;
+    }
+
+}
+
+
+@keyframes revealUp {
+
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+@keyframes revealScale {
+
+    from {
+        opacity: 0;
+        transform: scale(.94);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
+
+
+@keyframes finalReveal {
+
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+        filter: blur(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+
+}
+
+
+@keyframes developerPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 8px 35px rgba(0,0,0,.35);
+    }
+
+    50% {
+        box-shadow:
+            0 8px 35px rgba(0,0,0,.35),
+            0 0 20px rgba(215,184,122,.08);
+    }
+
+}
+
+
+@keyframes screenWave {
+
+    0% {
+        transform: scale(1);
+        filter: blur(0);
+    }
+
+    50% {
+        transform: scale(1.015);
+        filter: blur(1px);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: blur(0);
+    }
+
+}
+
+
+.reveal {
+    animation: revealUp 1s forwards;
+}
+
+.reveal-delay {
+    opacity: 0;
+    animation: revealUp 1s forwards .2s;
+}
+
+.reveal-delay-2 {
+    opacity: 0;
+    animation: revealUp 1s forwards .4s;
+}
+
+.reveal-delay-3 {
+    opacity: 0;
+    animation: revealScale 1.2s forwards .6s;
+}
+
+.reveal-delay-4 {
+    opacity: 0;
+    animation: revealUp 1s forwards .9s;
+}
+
+.developer-badge {
+    animation: developerPulse 4s ease-in-out infinite;
+}
+
+.blowing-screen {
+    animation: screenWave .6s ease;
+}
