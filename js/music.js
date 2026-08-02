@@ -159,45 +159,77 @@
 
 
     /* ---------------------------------------------------------
-       SAFE PLAY
-    --------------------------------------------------------- */
+   SAFE PLAY
+--------------------------------------------------------- */
 
-    async function safePlay(
-        audio,
-        volume
-    ) {
+async function safePlay(
+    audio,
+    volume
+) {
 
-        if (!audio) {
+    if (!audio) {
+        return false;
+    }
 
-            return false;
+
+    try {
+
+        audio.volume =
+            volume;
+
+
+        /*
+           Make sure the browser knows the
+           audio element should be played inline.
+        */
+
+        audio.setAttribute(
+            "playsinline",
+            ""
+        );
+
+
+        audio.setAttribute(
+            "webkit-playsinline",
+            ""
+        );
+
+
+        const playPromise =
+            audio.play();
+
+
+        /*
+           Some older browsers don't return
+           a Promise from play().
+        */
+
+        if (
+            playPromise !== undefined
+        ) {
+
+            await playPromise;
 
         }
 
 
-        try {
-
-            audio.volume =
-                volume;
-
-            await audio.play();
-
-            return true;
-
-        } catch (error) {
-
-            /*
-               Browser autoplay restriction.
-
-               We don't throw an error because the
-               music controller must keep functioning.
-            */
-
-            return false;
-
-        }
+        return true;
 
     }
 
+    catch (error) {
+
+        console.log(
+            "Birthday music waiting for user interaction:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
 
     /* ---------------------------------------------------------
        FADE OUT
@@ -698,103 +730,181 @@
     }
 
 
-    /* ---------------------------------------------------------
-       START BIRTHDAY ON ROOT PAGE
-    --------------------------------------------------------- */
+ /* ---------------------------------------------------------
+   START BIRTHDAY ON ROOT PAGE
+--------------------------------------------------------- */
 
-    async function startRootMusic() {
+async function startRootMusic() {
 
-        if (!isRootPage) {
-
-            return;
-
-        }
+    if (!isRootPage) {
+        return;
+    }
 
 
-        /*
-           Never start memories or intro
-           on the root page.
-        */
+    /*
+       Never allow memories or developer music
+       to remain active on the birthday page.
+    */
 
-        await stopAudio(
-            memoriesMusic,
-            false
-        );
+    await stopAudio(
+        memoriesMusic,
+        false
+    );
 
-
-        await stopAudio(
-            introMusic,
-            true
-        );
-
-
-        /*
-           Try birthday immediately.
-        */
-
-        const played =
-            await playBirthday();
+    await stopAudio(
+        introMusic,
+        true
+    );
 
 
-        /*
-           If Chrome blocks autoplay,
-           the first interaction will retry it.
-        */
+    /*
+       Try immediately.
 
-        if (!played) {
+       Desktop browsers will normally allow this.
+       Mobile browsers may reject it because the
+       page has not received a user gesture yet.
+    */
 
-            const startAfterInteraction =
-                async () => {
-
-                    if (
-                        birthdayMusic.paused
-                    ) {
-
-                        await playBirthday();
-
-                    }
-
-                    removeInteractionListeners();
-
-                };
+    const played =
+        await playBirthday();
 
 
-            document.addEventListener(
+    /*
+       If mobile blocks autoplay, remember that
+       birthday music still needs to be started.
+    */
+
+    if (!played) {
+
+        let unlocked = false;
+
+
+        const unlockBirthdayMusic =
+            async () => {
+
+                /*
+                   Prevent multiple attempts from
+                   running at the same time.
+                */
+
+                if (unlocked) {
+                    return;
+                }
+
+                unlocked = true;
+
+
+                /*
+                   This call now happens directly
+                   inside the user's gesture.
+                */
+
+                if (
+                    birthdayMusic &&
+                    birthdayMusic.paused
+                ) {
+
+                    await playBirthday();
+
+                }
+
+
+                /*
+                   Remove all fallback listeners.
+                */
+
+                removeUnlockListeners();
+
+            };
+
+
+        function removeUnlockListeners() {
+
+            document.removeEventListener(
                 "pointerdown",
-                startAfterInteraction,
-                {
-                    once: true,
-                    passive: true
-                }
+                unlockBirthdayMusic
             );
 
+            document.removeEventListener(
+                "touchstart",
+                unlockBirthdayMusic
+            );
 
-            document.addEventListener(
+            document.removeEventListener(
+                "click",
+                unlockBirthdayMusic
+            );
+
+            document.removeEventListener(
                 "keydown",
-                startAfterInteraction,
-                {
-                    once: true
-                }
+                unlockBirthdayMusic
             );
-
-
-            function removeInteractionListeners() {
-
-                document.removeEventListener(
-                    "pointerdown",
-                    startAfterInteraction
-                );
-
-                document.removeEventListener(
-                    "keydown",
-                    startAfterInteraction
-                );
-
-            }
 
         }
+
+
+        /*
+           pointerdown
+           ---------
+           Best option for modern mobile browsers.
+        */
+
+        document.addEventListener(
+            "pointerdown",
+            unlockBirthdayMusic,
+            {
+                once: true,
+                passive: true
+            }
+        );
+
+
+        /*
+           touchstart
+           ----------
+           Fallback for older mobile browsers.
+        */
+
+        document.addEventListener(
+            "touchstart",
+            unlockBirthdayMusic,
+            {
+                once: true,
+                passive: true
+            }
+        );
+
+
+        /*
+           click
+           -----
+           Additional fallback.
+        */
+
+        document.addEventListener(
+            "click",
+            unlockBirthdayMusic,
+            {
+                once: true
+            }
+        );
+
+
+        /*
+           Keyboard fallback for desktop.
+        */
+
+        document.addEventListener(
+            "keydown",
+            unlockBirthdayMusic,
+            {
+                once: true
+            }
+        );
 
     }
+
+}
 
 
     /* ---------------------------------------------------------
