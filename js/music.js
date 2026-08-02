@@ -742,121 +742,217 @@ async function startRootMusic() {
 
 
     /*
-       Never allow memories or developer music
-       to remain active on the birthday page.
+       =====================================================
+       FIRST ATTEMPT
+       =====================================================
+
+       Desktop browsers may allow this immediately.
+
+       Mobile browsers may reject it because there has
+       not yet been a user interaction.
     */
 
-    await stopAudio(
-        memoriesMusic,
-        false
-    );
+    birthdayMusic.loop = true;
 
-    await stopAudio(
-        introMusic,
-        true
-    );
+    birthdayMusic.volume =
+        VOLUME.birthday;
 
 
-    /*
-       Try immediately.
+    try {
 
-       Desktop browsers will normally allow this.
-       Mobile browsers may reject it because the
-       page has not received a user gesture yet.
-    */
+        const firstAttempt =
+            birthdayMusic.play();
 
-    const played =
-        await playBirthday();
+        if (
+            firstAttempt !== undefined
+        ) {
 
-
-    /*
-       If mobile blocks autoplay, remember that
-       birthday music still needs to be started.
-    */
-
-    if (!played) {
-
-        let unlocked = false;
-
-
-        const unlockBirthdayMusic =
-            async () => {
-
-                /*
-                   Prevent multiple attempts from
-                   running at the same time.
-                */
-
-                if (unlocked) {
-                    return;
-                }
-
-                unlocked = true;
-
-
-                /*
-                   This call now happens directly
-                   inside the user's gesture.
-                */
-
-                if (
-                    birthdayMusic &&
-                    birthdayMusic.paused
-                ) {
-
-                    await playBirthday();
-
-                }
-
-
-                /*
-                   Remove all fallback listeners.
-                */
-
-                removeUnlockListeners();
-
-            };
-
-
-        function removeUnlockListeners() {
-
-            document.removeEventListener(
-                "pointerdown",
-                unlockBirthdayMusic
-            );
-
-            document.removeEventListener(
-                "touchstart",
-                unlockBirthdayMusic
-            );
-
-            document.removeEventListener(
-                "click",
-                unlockBirthdayMusic
-            );
-
-            document.removeEventListener(
-                "keydown",
-                unlockBirthdayMusic
-            );
+            await firstAttempt;
 
         }
 
 
         /*
-           pointerdown
-           ---------
-           Best option for modern mobile browsers.
+           If it worked, clean up the other
+           possible music sources.
         */
 
-        document.addEventListener(
-            "pointerdown",
-            unlockBirthdayMusic,
-            {
-                once: true,
-                passive: true
-            }
+        sessionStorage.setItem(
+            BIRTHDAY_ACTIVE_KEY,
+            "true"
         );
+
+
+        await stopAudio(
+            memoriesMusic,
+            false
+        );
+
+
+        await stopAudio(
+            introMusic,
+            true
+        );
+
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        /*
+           Mobile browser blocked autoplay.
+
+           THIS IS NORMAL.
+
+           We now wait for the user's first
+           real interaction.
+        */
+
+        console.log(
+            "Birthday autoplay blocked. Waiting for user interaction."
+        );
+
+    }
+
+
+    /* =====================================================
+       MOBILE UNLOCK
+       ===================================================== */
+
+    let unlocked = false;
+
+
+    const unlockBirthday =
+        () => {
+
+            if (unlocked) {
+                return;
+            }
+
+
+            unlocked = true;
+
+
+            /*
+               =================================================
+               VERY IMPORTANT
+
+               DO NOT await anything before play().
+
+               play() must happen directly inside the
+               user gesture.
+               =================================================
+            */
+
+            birthdayMusic.loop = true;
+
+            birthdayMusic.volume =
+                VOLUME.birthday;
+
+
+            const playPromise =
+                birthdayMusic.play();
+
+
+            if (
+                playPromise !== undefined
+            ) {
+
+                playPromise
+                    .then(() => {
+
+                        sessionStorage.setItem(
+                            BIRTHDAY_ACTIVE_KEY,
+                            "true"
+                        );
+
+
+                        /*
+                           Only AFTER birthday has successfully
+                           started do we clean up the other audio.
+                        */
+
+                        stopAudio(
+                            memoriesMusic,
+                            false
+                        );
+
+
+                        stopAudio(
+                            introMusic,
+                            true
+                        );
+
+                    })
+                    .catch(error => {
+
+                        console.log(
+                            "Birthday music could not start:",
+                            error
+                        );
+
+
+                        /*
+                           Allow another interaction to
+                           try again.
+                        */
+
+                        unlocked = false;
+
+                    });
+
+            }
+
+        };
+
+
+    /* =====================================================
+       LISTEN FOR REAL MOBILE GESTURE
+       ===================================================== */
+
+    document.addEventListener(
+        "touchstart",
+        unlockBirthday,
+        {
+            once: true,
+            passive: true
+        }
+    );
+
+
+    document.addEventListener(
+        "pointerdown",
+        unlockBirthday,
+        {
+            once: true,
+            passive: true
+        }
+    );
+
+
+    document.addEventListener(
+        "click",
+        unlockBirthday,
+        {
+            once: true
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        unlockBirthday,
+        {
+            once: true
+        }
+    );
+
+
+    return false;
+
+}
 
 
         /*
