@@ -1,92 +1,91 @@
 /* =========================================================
    MEMORIES PAGE
+   FINAL
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    if (
-        !document.body.classList.contains(
-            "memories-page"
-        )
-    ) {
-        return;
-    }
+        if (
+            !document.body.classList.contains(
+                "memories-page"
+            )
+        ) {
 
-
-    /* -----------------------------------------------------
-       START MEMORY MUSIC
-    ----------------------------------------------------- */
-
-    const startMemoryMusic = () => {
-
-        if (window.BirthdayMusic) {
-
-            window.BirthdayMusic.playMemories();
+            return;
 
         }
 
-        document.removeEventListener(
-            "click",
-            startMemoryMusic
-        );
 
-    };
+        /*
+           MUSIC IS NOW CONTROLLED BY music.js.
 
-
-    document.addEventListener(
-        "click",
-        startMemoryMusic,
-        { once: true }
-    );
+           Do NOT start music on random clicks.
+        */
 
 
-    /* -----------------------------------------------------
-       IMAGE REVEAL
-    ----------------------------------------------------- */
+        /* -----------------------------------------------------
+           IMAGE REVEAL
+        ----------------------------------------------------- */
 
-    const cards =
-        document.querySelectorAll(
-            ".memory-card"
-        );
+        const cards =
+            document.querySelectorAll(
+                ".memory-card"
+            );
 
 
-    const observer =
-        new IntersectionObserver(
-            (entries) => {
+        if (cards.length) {
 
-                entries.forEach(entry => {
+            const observer =
+                new IntersectionObserver(
+                    entries => {
 
-                    if (entry.isIntersecting) {
+                        entries.forEach(
+                            entry => {
 
-                        entry.target.style.opacity =
-                            "1";
+                                if (
+                                    entry.isIntersecting
+                                ) {
 
-                        entry.target.style.transform =
-                            "translateY(0)";
+                                    entry.target.style.opacity =
+                                        "1";
 
+                                    entry.target.style.transform =
+                                        "translateY(0)";
+
+                                }
+
+                            }
+                        );
+
+                    },
+                    {
+                        threshold: 0.15
                     }
-
-                });
-
-            },
-            {
-                threshold: 0.15
-            }
-        );
+                );
 
 
-    cards.forEach(card => {
+            cards.forEach(
+                card => {
 
-        card.style.opacity = "0";
+                    card.style.opacity =
+                        "0";
 
-        card.style.transform =
-            "translateY(50px)";
+                    card.style.transform =
+                        "translateY(50px)";
 
-        card.style.transition =
-            "opacity 1s ease, transform 1s ease";
+                    card.style.transition =
+                        "opacity 1s ease, transform 1s ease";
 
-        observer.observe(card);
+                    observer.observe(
+                        card
+                    );
 
-    });
+                }
+            );
 
-});
+        }
+
+    }
+);

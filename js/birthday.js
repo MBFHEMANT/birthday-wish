@@ -1,66 +1,88 @@
 /* =========================================================
    BIRTHDAY EXPERIENCE
-   FINAL VERSION
+   FINAL
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    const blowButton =
-        document.getElementById("blowButton");
+        const blowButton =
+            document.getElementById(
+                "blowButton"
+            );
 
-    const celebrationOverlay =
-        document.getElementById("celebrationOverlay");
+        const celebrationOverlay =
+            document.getElementById(
+                "celebrationOverlay"
+            );
 
-    const candles =
-        document.querySelectorAll(".candle");
+        const candles =
+            document.querySelectorAll(
+                ".candle"
+            );
 
-    const wishText =
-        document.getElementById("wishText");
-
-
-    if (!blowButton) {
-        return;
-    }
-
-
-    let alreadyBlown = false;
-
-
-    /* ---------------------------------------------------------
-       CREATE CONTINUE BUTTON
-    --------------------------------------------------------- */
-
-    const continueButton =
-        document.createElement("a");
-
-    continueButton.href =
-        "pages/memories.html";
-
-    continueButton.className =
-        "primary-button birthday-continue-button";
-
-    continueButton.innerHTML = `
-        Continue
-        <span>→</span>
-    `;
-
-    continueButton.style.opacity = "0";
-    continueButton.style.visibility = "hidden";
-    continueButton.style.transform =
-        "translateY(15px)";
-
-    continueButton.style.transition =
-        "opacity 800ms ease, transform 800ms ease";
+        const wishText =
+            document.getElementById(
+                "wishText"
+            );
 
 
-    /* Put button inside celebration content */
+        if (!blowButton) {
 
-    if (celebrationOverlay) {
+            return;
+
+        }
+
+
+        let alreadyBlown =
+            false;
+
+
+        /* -----------------------------------------------------
+           CONTINUE BUTTON
+        ----------------------------------------------------- */
+
+        const continueButton =
+            document.createElement(
+                "a"
+            );
+
+
+        continueButton.href =
+            "pages/memories.html";
+
+
+        continueButton.className =
+            "primary-button birthday-continue-button";
+
+
+        continueButton.innerHTML = `
+            Continue
+            <span>→</span>
+        `;
+
+
+        continueButton.style.opacity =
+            "0";
+
+        continueButton.style.visibility =
+            "hidden";
+
+        continueButton.style.transform =
+            "translateY(15px)";
+
+
+        continueButton.style.transition =
+            "opacity .8s ease, transform .8s ease";
+
 
         const celebrationContent =
-            celebrationOverlay.querySelector(
-                ".celebration-content"
-            );
+            celebrationOverlay
+                ?.querySelector(
+                    ".celebration-content"
+                );
+
 
         if (celebrationContent) {
 
@@ -70,168 +92,182 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-    }
 
+        /* -----------------------------------------------------
+           CONTINUE
+        ----------------------------------------------------- */
 
-    /* ---------------------------------------------------------
-       CONTINUE BUTTON
-    --------------------------------------------------------- */
+        continueButton.addEventListener(
+            "click",
+            async event => {
 
-    continueButton.addEventListener(
-        "click",
-        async (event) => {
+                event.preventDefault();
 
-            event.preventDefault();
-
-            /*
-               Birthday music remains playing
-               until this exact moment.
-            */
-
-            if (window.BirthdayMusic) {
-
-                await window.BirthdayMusic
-                    .stopBirthday();
 
                 /*
-                   Start memories before navigation.
-                   The browser interaction that clicked
-                   Continue is already valid user interaction.
+                   Birthday music stops ONLY here.
+
+                   This is exactly what we want.
+                */
+
+                if (
+                    window.BirthdayMusic
+                ) {
+
+                    await window.BirthdayMusic
+                        .stopBirthday();
+
+                }
+
+
+                /*
+                   Tell Chapter 2 that memories
+                   should start.
                 */
 
                 sessionStorage.setItem(
-                    "startMemoriesMusic",
+                    "hmt_memories_started",
                     "true"
                 );
 
-            }
 
-            window.location.href =
-                "pages/memories.html";
-
-        }
-    );
-
-
-    /* ---------------------------------------------------------
-       BLOW CANDLES
-    --------------------------------------------------------- */
-
-    blowButton.addEventListener(
-        "click",
-        () => {
-
-            if (alreadyBlown) {
-                return;
-            }
-
-            alreadyBlown = true;
-
-
-            /* BUTTON */
-
-            blowButton.disabled = true;
-
-            blowButton.style.transition =
-                "opacity 500ms ease, transform 500ms ease";
-
-            blowButton.style.opacity = "0";
-
-            blowButton.style.transform =
-                "translateY(10px)";
-
-
-            /* WISH TEXT */
-
-            if (wishText) {
-
-                wishText.style.transition =
-                    "600ms ease";
-
-                wishText.style.opacity =
-                    "0";
+                window.location.href =
+                    "pages/memories.html";
 
             }
+        );
 
 
-            /* CANDLES */
+        /* -----------------------------------------------------
+           BLOW CANDLES
+        ----------------------------------------------------- */
 
-            candles.forEach(
-                (candle, index) => {
+        blowButton.addEventListener(
+            "click",
+            () => {
 
-                    setTimeout(
-                        () => {
+                if (alreadyBlown) {
 
-                            candle.classList.add(
-                                "blown"
-                            );
-
-                        },
-                        index * 120
-                    );
+                    return;
 
                 }
-            );
 
 
-            /* SCREEN EFFECT */
-
-            document.body.classList.add(
-                "blowing-screen"
-            );
+                alreadyBlown =
+                    true;
 
 
-            /*
-               IMPORTANT:
-               DO NOT TOUCH birthdayMusic.
-
-               It is already playing from page load.
-            */
+                blowButton.disabled =
+                    true;
 
 
-            /* CELEBRATION */
+                blowButton.style.transition =
+                    "opacity .5s ease, transform .5s ease";
 
-            setTimeout(
-                () => {
 
-                    if (celebrationOverlay) {
+                blowButton.style.opacity =
+                    "0";
 
-                        celebrationOverlay.classList.add(
-                            "active"
+
+                blowButton.style.transform =
+                    "translateY(10px)";
+
+
+                if (wishText) {
+
+                    wishText.style.transition =
+                        "opacity .6s ease";
+
+                    wishText.style.opacity =
+                        "0";
+
+                }
+
+
+                /* CANDLES */
+
+                candles.forEach(
+                    (candle, index) => {
+
+                        setTimeout(
+                            () => {
+
+                                candle.classList.add(
+                                    "blown"
+                                );
+
+                            },
+                            index * 100
                         );
 
                     }
-
-                },
-                850
-            );
+                );
 
 
-            /* SHOW CONTINUE */
+                /* EFFECT */
 
-            setTimeout(
-                () => {
+                document.body.classList.add(
+                    "blowing-screen"
+                );
 
-                    continueButton.style.visibility =
-                        "visible";
 
-                    requestAnimationFrame(
-                        () => {
+                /*
+                   IMPORTANT:
 
-                            continueButton.style.opacity =
-                                "1";
+                   DO NOT START OR RESTART MUSIC HERE.
 
-                            continueButton.style.transform =
-                                "translateY(0)";
+                   birthday.mp3 is already supposed
+                   to be playing from page opening.
+                */
+
+
+                /* CELEBRATION */
+
+                setTimeout(
+                    () => {
+
+                        if (
+                            celebrationOverlay
+                        ) {
+
+                            celebrationOverlay.classList.add(
+                                "active"
+                            );
 
                         }
-                    );
 
-                },
-                3000
-            );
+                    },
+                    800
+                );
 
-        }
-    );
 
-});
+                /* CONTINUE BUTTON */
+
+                setTimeout(
+                    () => {
+
+                        continueButton.style.visibility =
+                            "visible";
+
+
+                        requestAnimationFrame(
+                            () => {
+
+                                continueButton.style.opacity =
+                                    "1";
+
+                                continueButton.style.transform =
+                                    "translateY(0)";
+
+                            }
+                        );
+
+                    },
+                    2800
+                );
+
+            }
+        );
+
+    }
+);

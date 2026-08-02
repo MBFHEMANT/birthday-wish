@@ -1,127 +1,270 @@
 /* =========================================================
    HMT BIRTHDAY EXPERIENCE
-   GLOBAL MUSIC CONTROLLER
-   FINAL VERSION
+   GLOBAL MUSIC ENGINE
+   FINAL MUSIC SYSTEM
 ========================================================= */
 
 (function () {
 
-    const STORAGE_KEY = "hmtBirthdayMusicState";
+    "use strict";
 
-    let birthdayMusic = document.getElementById("birthdayMusic");
-    let memoriesMusic = document.getElementById("memoriesMusic");
-    let introMusic = document.getElementById("introMusic");
+
+    /* ---------------------------------------------------------
+       DETECT PAGE
+    --------------------------------------------------------- */
+
+    const path =
+        window.location.pathname.toLowerCase();
 
     const isRootPage =
-        !window.location.pathname.includes("/pages/");
+        !path.includes("/pages/");
 
-    const assetPrefix = isRootPage ? "" : "../";
-
-    /* ---------------------------------------------------------
-       CREATE MISSING AUDIO ELEMENTS
-    --------------------------------------------------------- */
-
-    function createAudioIfMissing(id, src, loop = false) {
-
-        let audio = document.getElementById(id);
-
-        if (audio) {
-            return audio;
-        }
-
-        audio = document.createElement("audio");
-
-        audio.id = id;
-        audio.preload = "auto";
-        audio.loop = loop;
-
-        const source = document.createElement("source");
-        source.src = assetPrefix + src;
-        source.type = "audio/mpeg";
-
-        audio.appendChild(source);
-        document.body.appendChild(audio);
-
-        return audio;
-    }
+    const pagePrefix =
+        isRootPage ? "" : "../";
 
 
     /* ---------------------------------------------------------
-       AUDIO ELEMENTS
+       AUDIO PATHS
     --------------------------------------------------------- */
 
-    if (!birthdayMusic && isRootPage) {
-        birthdayMusic = createAudioIfMissing(
-            "birthdayMusic",
-            "assets/music/birthday.mp3"
-        );
-    }
+    const AUDIO_PATHS = {
 
-    if (!memoriesMusic && !isRootPage) {
-        memoriesMusic = createAudioIfMissing(
-            "memoriesMusic",
+        birthday:
+            pagePrefix +
+            "assets/music/birthday.mp3",
+
+        memories:
+            pagePrefix +
             "assets/music/memories.mp3",
-            true
-        );
-    }
 
-    if (!introMusic) {
-        introMusic = createAudioIfMissing(
-            "introMusic",
+        intro:
+            pagePrefix +
             "assets/music/intro.mp3"
-        );
-    }
+
+    };
 
 
     /* ---------------------------------------------------------
-       VOLUME
+       CREATE / GET AUDIO
     --------------------------------------------------------- */
 
-    const BIRTHDAY_VOLUME = 0.65;
-    const MEMORIES_VOLUME = 0.38;
-    const INTRO_VOLUME = 0.48;
+    function getAudio(
+        id,
+        src,
+        loop = false
+    ) {
 
+        let audio =
+            document.getElementById(id);
 
-    /* ---------------------------------------------------------
-       FADE
-    --------------------------------------------------------- */
-
-    function fadeAudio(audio, targetVolume, duration = 700) {
 
         if (!audio) {
-            return Promise.resolve();
+
+            audio =
+                document.createElement("audio");
+
+            audio.id = id;
+
+            audio.preload = "auto";
+
+            audio.loop = loop;
+
+            audio.setAttribute(
+                "playsinline",
+                ""
+            );
+
+            audio.style.display =
+                "none";
+
+            const source =
+                document.createElement("source");
+
+            source.src = src;
+
+            source.type =
+                "audio/mpeg";
+
+            audio.appendChild(source);
+
+            document.body.appendChild(
+                audio
+            );
+
         }
+
+
+        audio.loop = loop;
+
+        return audio;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       AUDIO OBJECTS
+    --------------------------------------------------------- */
+
+    const birthdayMusic =
+        getAudio(
+            "birthdayMusic",
+            AUDIO_PATHS.birthday,
+            true
+        );
+
+
+    const memoriesMusic =
+        getAudio(
+            "memoriesMusic",
+            AUDIO_PATHS.memories,
+            true
+        );
+
+
+    const introMusic =
+        getAudio(
+            "introMusic",
+            AUDIO_PATHS.intro,
+            true
+        );
+
+
+    /* ---------------------------------------------------------
+       VOLUMES
+    --------------------------------------------------------- */
+
+    const VOLUME = {
+
+        birthday: 0.65,
+
+        memories: 0.38,
+
+        intro: 0.48
+
+    };
+
+
+    /* ---------------------------------------------------------
+       STORAGE
+    --------------------------------------------------------- */
+
+    const MEMORY_TIME_KEY =
+        "hmt_memories_time";
+
+    const MEMORY_ACTIVE_KEY =
+        "hmt_memories_active";
+
+    const BIRTHDAY_ACTIVE_KEY =
+        "hmt_birthday_active";
+
+
+    /* ---------------------------------------------------------
+       SAFE PLAY
+    --------------------------------------------------------- */
+
+    async function safePlay(
+        audio,
+        volume
+    ) {
+
+        if (!audio) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            audio.volume =
+                volume;
+
+            await audio.play();
+
+            return true;
+
+        } catch (error) {
+
+            /*
+               Browser autoplay restriction.
+
+               We don't throw an error because the
+               music controller must keep functioning.
+            */
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       FADE OUT
+    --------------------------------------------------------- */
+
+    function fadeOut(
+        audio,
+        duration = 500
+    ) {
+
+        if (
+            !audio ||
+            audio.paused
+        ) {
+
+            return Promise.resolve();
+
+        }
+
 
         return new Promise(resolve => {
 
-            const startVolume = audio.volume;
-            const difference = targetVolume - startVolume;
-            const startTime = performance.now();
+            const startingVolume =
+                audio.volume;
 
-            function step(now) {
+            const startedAt =
+                performance.now();
+
+
+            function animate(now) {
 
                 const progress =
                     Math.min(
-                        (now - startTime) / duration,
+                        (now - startedAt) /
+                        duration,
                         1
                     );
 
+
                 audio.volume =
-                    startVolume +
-                    difference * progress;
+                    startingVolume *
+                    (1 - progress);
+
 
                 if (progress < 1) {
 
-                    requestAnimationFrame(step);
+                    requestAnimationFrame(
+                        animate
+                    );
 
                 } else {
+
+                    audio.pause();
+
+                    audio.volume =
+                        startingVolume;
 
                     resolve();
 
                 }
+
             }
 
-            requestAnimationFrame(step);
+
+            requestAnimationFrame(
+                animate
+            );
 
         });
 
@@ -129,61 +272,102 @@
 
 
     /* ---------------------------------------------------------
-       STOP
+       FADE IN
     --------------------------------------------------------- */
 
-    async function stopAudio(audio, reset = true) {
+    function fadeIn(
+        audio,
+        targetVolume,
+        duration = 800
+    ) {
 
         if (!audio) {
-            return;
+
+            return Promise.resolve();
+
         }
 
-        try {
-
-            await fadeAudio(
-                audio,
-                0,
-                500
-            );
-
-        } catch (error) {}
-
-        audio.pause();
-
-        if (reset) {
-            audio.currentTime = 0;
-        }
-
-    }
-
-
-    /* ---------------------------------------------------------
-       PLAY
-    --------------------------------------------------------- */
-
-    async function playAudio(audio, volume) {
-
-        if (!audio) {
-            return false;
-        }
 
         audio.volume = 0;
 
-        try {
 
-            await audio.play();
+        return new Promise(resolve => {
 
-            await fadeAudio(
-                audio,
-                volume,
-                900
+            const startedAt =
+                performance.now();
+
+
+            function animate(now) {
+
+                const progress =
+                    Math.min(
+                        (now - startedAt) /
+                        duration,
+                        1
+                    );
+
+
+                audio.volume =
+                    targetVolume *
+                    progress;
+
+
+                if (progress < 1) {
+
+                    requestAnimationFrame(
+                        animate
+                    );
+
+                } else {
+
+                    resolve();
+
+                }
+
+            }
+
+
+            requestAnimationFrame(
+                animate
             );
 
-            return true;
+        });
 
-        } catch (error) {
+    }
 
-            return false;
+
+    /* ---------------------------------------------------------
+       STOP AUDIO
+    --------------------------------------------------------- */
+
+    async function stopAudio(
+        audio,
+        reset = false
+    ) {
+
+        if (!audio) {
+
+            return;
+
+        }
+
+
+        await fadeOut(
+            audio,
+            450
+        );
+
+
+        audio.pause();
+
+
+        if (reset) {
+
+            try {
+
+                audio.currentTime = 0;
+
+            } catch (error) {}
 
         }
 
@@ -191,54 +375,28 @@
 
 
     /* ---------------------------------------------------------
-       SAVE MEMORY MUSIC POSITION
+       SAVE MEMORY POSITION
     --------------------------------------------------------- */
 
-    function saveMemoriesPosition() {
+    function saveMemoryPosition() {
 
         if (!memoriesMusic) {
+
             return;
+
         }
+
 
         try {
 
             sessionStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify({
-                    currentTime: memoriesMusic.currentTime,
-                    wasPlaying: !memoriesMusic.paused
-                })
+                MEMORY_TIME_KEY,
+                String(
+                    memoriesMusic.currentTime
+                )
             );
 
         } catch (error) {}
-
-    }
-
-
-    /* ---------------------------------------------------------
-       GET SAVED POSITION
-    --------------------------------------------------------- */
-
-    function getSavedMemoriesPosition() {
-
-        try {
-
-            const data =
-                sessionStorage.getItem(
-                    STORAGE_KEY
-                );
-
-            if (!data) {
-                return null;
-            }
-
-            return JSON.parse(data);
-
-        } catch (error) {
-
-            return null;
-
-        }
 
     }
 
@@ -247,28 +405,36 @@
        RESTORE MEMORY POSITION
     --------------------------------------------------------- */
 
-    function restoreMemoriesPosition() {
+    function restoreMemoryPosition() {
 
         if (!memoriesMusic) {
+
             return;
+
         }
 
-        const saved =
-            getSavedMemoriesPosition();
 
-        if (
-            saved &&
-            typeof saved.currentTime === "number"
-        ) {
+        try {
 
-            try {
+            const saved =
+                sessionStorage.getItem(
+                    MEMORY_TIME_KEY
+                );
+
+
+            if (
+                saved !== null &&
+                !Number.isNaN(
+                    Number(saved)
+                )
+            ) {
 
                 memoriesMusic.currentTime =
-                    saved.currentTime;
+                    Number(saved);
 
-            } catch (error) {}
+            }
 
-        }
+        } catch (error) {}
 
     }
 
@@ -279,26 +445,54 @@
 
     async function playBirthday() {
 
-        if (!birthdayMusic) {
-            return;
+        /*
+           Birthday music must NOT be restarted
+           if it is already playing.
+        */
+
+        if (
+            !birthdayMusic.paused
+        ) {
+
+            return true;
+
         }
 
-        await stopAudio(
-            introMusic,
-            true
-        );
 
         await stopAudio(
             memoriesMusic,
             false
         );
 
-        birthdayMusic.loop = true;
 
-        await playAudio(
-            birthdayMusic,
-            BIRTHDAY_VOLUME
+        await stopAudio(
+            introMusic,
+            true
         );
+
+
+        birthdayMusic.loop =
+            true;
+
+
+        const played =
+            await safePlay(
+                birthdayMusic,
+                VOLUME.birthday
+            );
+
+
+        if (played) {
+
+            sessionStorage.setItem(
+                BIRTHDAY_ACTIVE_KEY,
+                "true"
+            );
+
+        }
+
+
+        return played;
 
     }
 
@@ -309,28 +503,57 @@
 
     async function playMemories() {
 
-        if (!memoriesMusic) {
-            return;
+        /*
+           Already playing?
+           DO NOT RESTART IT.
+        */
+
+        if (
+            !memoriesMusic.paused
+        ) {
+
+            return true;
+
         }
+
 
         await stopAudio(
             birthdayMusic,
             false
         );
 
+
         await stopAudio(
             introMusic,
             true
         );
 
-        restoreMemoriesPosition();
 
-        memoriesMusic.loop = true;
+        restoreMemoryPosition();
 
-        await playAudio(
-            memoriesMusic,
-            MEMORIES_VOLUME
-        );
+
+        memoriesMusic.loop =
+            true;
+
+
+        const played =
+            await safePlay(
+                memoriesMusic,
+                VOLUME.memories
+            );
+
+
+        if (played) {
+
+            sessionStorage.setItem(
+                MEMORY_ACTIVE_KEY,
+                "true"
+            );
+
+        }
+
+
+        return played;
 
     }
 
@@ -342,61 +565,117 @@
     async function resumeMemories() {
 
         if (!memoriesMusic) {
-            return;
+
+            return false;
+
         }
 
-        restoreMemoriesPosition();
 
-        memoriesMusic.loop = true;
+        restoreMemoryPosition();
 
-        await playAudio(
-            memoriesMusic,
-            MEMORIES_VOLUME
-        );
+
+        memoriesMusic.loop =
+            true;
+
+
+        const played =
+            await safePlay(
+                memoriesMusic,
+                VOLUME.memories
+            );
+
+
+        if (played) {
+
+            sessionStorage.setItem(
+                MEMORY_ACTIVE_KEY,
+                "true"
+            );
+
+        }
+
+
+        return played;
 
     }
 
 
     /* ---------------------------------------------------------
-       DEVELOPER MUSIC
+       DEVELOPER / HMT MUSIC
     --------------------------------------------------------- */
 
     async function playDeveloperMusic() {
 
-        saveMemoriesPosition();
+        /*
+           Save exact memories position
+           before stopping it.
+        */
 
-        if (memoriesMusic) {
+        saveMemoryPosition();
 
-            await fadeAudio(
+
+        if (
+            memoriesMusic &&
+            !memoriesMusic.paused
+        ) {
+
+            await fadeOut(
                 memoriesMusic,
-                0,
-                500
+                450
             );
 
             memoriesMusic.pause();
 
         }
 
+
         await stopAudio(
             birthdayMusic,
             false
         );
+
 
         await stopAudio(
             introMusic,
             true
         );
 
-        await playAudio(
-            introMusic,
-            INTRO_VOLUME
-        );
+
+        introMusic.loop =
+            true;
+
+
+        const played =
+            await safePlay(
+                introMusic,
+                VOLUME.intro
+            );
+
+
+        /*
+           If autoplay is blocked here, the HMT
+           button itself was already a user click,
+           so this should normally succeed.
+        */
+
+        if (!played) {
+
+            try {
+
+                await introMusic.play();
+
+            } catch (error) {}
+
+        }
+
+
+        return played;
 
     }
 
 
     /* ---------------------------------------------------------
-       CLOSE DEVELOPER MUSIC
+       CLOSE DEVELOPER
     --------------------------------------------------------- */
 
     async function closeDeveloperMusic() {
@@ -406,38 +685,112 @@
             true
         );
 
-        if (memoriesMusic) {
 
-            restoreMemoriesPosition();
+        /*
+           Always restore memories after HMT.
+        */
 
-            memoriesMusic.loop = true;
+        restoreMemoryPosition();
 
-            await playAudio(
-                memoriesMusic,
-                MEMORIES_VOLUME
-            );
 
-        }
+        await resumeMemories();
 
     }
 
 
     /* ---------------------------------------------------------
-       FIRST INTERACTION FALLBACK
+       START BIRTHDAY ON ROOT PAGE
     --------------------------------------------------------- */
 
-    function tryStartBirthdayMusic() {
+    async function startRootMusic() {
 
         if (!isRootPage) {
+
             return;
+
         }
 
-        if (
-            birthdayMusic &&
-            birthdayMusic.paused
-        ) {
 
-            playBirthday();
+        /*
+           Never start memories or intro
+           on the root page.
+        */
+
+        await stopAudio(
+            memoriesMusic,
+            false
+        );
+
+
+        await stopAudio(
+            introMusic,
+            true
+        );
+
+
+        /*
+           Try birthday immediately.
+        */
+
+        const played =
+            await playBirthday();
+
+
+        /*
+           If Chrome blocks autoplay,
+           the first interaction will retry it.
+        */
+
+        if (!played) {
+
+            const startAfterInteraction =
+                async () => {
+
+                    if (
+                        birthdayMusic.paused
+                    ) {
+
+                        await playBirthday();
+
+                    }
+
+                    removeInteractionListeners();
+
+                };
+
+
+            document.addEventListener(
+                "pointerdown",
+                startAfterInteraction,
+                {
+                    once: true,
+                    passive: true
+                }
+            );
+
+
+            document.addEventListener(
+                "keydown",
+                startAfterInteraction,
+                {
+                    once: true
+                }
+            );
+
+
+            function removeInteractionListeners() {
+
+                document.removeEventListener(
+                    "pointerdown",
+                    startAfterInteraction
+                );
+
+                document.removeEventListener(
+                    "keydown",
+                    startAfterInteraction
+                );
+
+            }
 
         }
 
@@ -445,7 +798,176 @@
 
 
     /* ---------------------------------------------------------
-       ROOT PAGE: START BIRTHDAY MUSIC
+       START MEMORIES ON INNER PAGES
+    --------------------------------------------------------- */
+
+    async function startInnerPageMusic() {
+
+        if (isRootPage) {
+
+            return;
+
+        }
+
+
+        /*
+           Every chapter is now responsible for
+           continuing memories.mp3.
+
+           This is why music.js MUST be loaded
+           on every chapter.
+        */
+
+        const played =
+            await resumeMemories();
+
+
+        /*
+           Browser fallback.
+
+           The visitor has normally arrived here
+           by clicking a chapter button, so this
+           gives the browser another valid gesture.
+        */
+
+        if (!played) {
+
+            const retry =
+                async () => {
+
+                    await resumeMemories();
+
+                    removeRetry();
+
+                };
+
+
+            document.addEventListener(
+                "pointerdown",
+                retry,
+                {
+                    once: true,
+                    passive: true
+                }
+            );
+
+
+            document.addEventListener(
+                "keydown",
+                retry,
+                {
+                    once: true
+                }
+            );
+
+
+            function removeRetry() {
+
+                document.removeEventListener(
+                    "pointerdown",
+                    retry
+                );
+
+                document.removeEventListener(
+                    "keydown",
+                    retry
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       SAVE MUSIC BEFORE PAGE CHANGE
+    --------------------------------------------------------- */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const link =
+                event.target.closest(
+                    "a[href]"
+                );
+
+
+            if (!link) {
+
+                return;
+
+            }
+
+
+            const href =
+                link.getAttribute("href");
+
+
+            if (
+                !href ||
+                href.startsWith("#") ||
+                href.startsWith("http")
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !memoriesMusic.paused
+            ) {
+
+                saveMemoryPosition();
+
+            }
+
+        },
+        true
+    );
+
+
+    /* ---------------------------------------------------------
+       SAVE PERIODICALLY
+    --------------------------------------------------------- */
+
+    setInterval(
+        () => {
+
+            if (
+                memoriesMusic &&
+                !memoriesMusic.paused
+            ) {
+
+                saveMemoryPosition();
+
+            }
+
+        },
+        1000
+    );
+
+
+    /* ---------------------------------------------------------
+       SAVE BEFORE LEAVING
+    --------------------------------------------------------- */
+
+    window.addEventListener(
+        "pagehide",
+        saveMemoryPosition
+    );
+
+
+    window.addEventListener(
+        "beforeunload",
+        saveMemoryPosition
+    );
+
+
+    /* ---------------------------------------------------------
+       INITIALIZE
     --------------------------------------------------------- */
 
     if (isRootPage) {
@@ -455,101 +977,28 @@
             () => {
 
                 setTimeout(
-                    () => {
-
-                        playBirthday();
-
-                    },
-                    250
+                    startRootMusic,
+                    150
                 );
 
             }
         );
 
-
-        document.addEventListener(
-            "pointerdown",
-            tryStartBirthdayMusic,
-            { once: true }
-        );
-
-
-        document.addEventListener(
-            "keydown",
-            tryStartBirthdayMusic,
-            { once: true }
-        );
-
-    }
-
-
-    /* ---------------------------------------------------------
-       INNER PAGES: RESTORE MEMORIES MUSIC
-    --------------------------------------------------------- */
-
-    if (!isRootPage) {
+    } else {
 
         window.addEventListener(
             "load",
             () => {
 
                 setTimeout(
-                    () => {
-
-                        resumeMemories();
-
-                    },
-                    250
+                    startInnerPageMusic,
+                    100
                 );
 
             }
         );
 
-
-        document.addEventListener(
-            "pointerdown",
-            () => {
-
-                if (
-                    memoriesMusic &&
-                    memoriesMusic.paused
-                ) {
-
-                    resumeMemories();
-
-                }
-
-            },
-            { once: true }
-        );
-
     }
-
-
-    /* ---------------------------------------------------------
-       SAVE BEFORE LEAVING PAGE
-    --------------------------------------------------------- */
-
-    window.addEventListener(
-        "beforeunload",
-        saveMemoriesPosition
-    );
-
-
-    document.addEventListener(
-        "visibilitychange",
-        () => {
-
-            if (
-                document.visibilityState === "hidden"
-            ) {
-
-                saveMemoriesPosition();
-
-            }
-
-        }
-    );
 
 
     /* ---------------------------------------------------------
@@ -568,27 +1017,26 @@
 
         closeDeveloperMusic,
 
-        saveMemoriesPosition,
+        saveMemoryPosition,
 
-        stopBirthday: async function () {
+        stopBirthday:
+            () =>
+                stopAudio(
+                    birthdayMusic,
+                    false
+                ),
 
-            await stopAudio(
-                birthdayMusic,
-                false
-            );
+        stopMemories:
+            () => {
 
-        },
+                saveMemoryPosition();
 
-        stopMemories: async function () {
+                return stopAudio(
+                    memoriesMusic,
+                    false
+                );
 
-            saveMemoriesPosition();
-
-            await stopAudio(
-                memoriesMusic,
-                false
-            );
-
-        }
+            }
 
     };
 

@@ -1976,3 +1976,1226 @@ body.developer-open > *:not(.developer-overlay) {
     }
 
 }
+/* =========================================================
+   FINAL PAGE — SPECIAL BUTTONS
+========================================================= */
+
+.final-actions {
+    margin-top: 70px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 18px;
+
+    position: relative;
+
+    z-index: 20;
+}
+
+
+/* ---------------------------------------------------------
+   SPECIAL BUTTON BASE
+--------------------------------------------------------- */
+
+.final-special-button {
+
+    position: relative;
+
+    min-width: 310px;
+
+    padding: 17px 30px 15px;
+
+    border: 1px solid
+        rgba(211, 184, 124, 0.28);
+
+    border-radius: 4px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.035),
+            rgba(211,184,124,0.025)
+        );
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    font-family: var(--sans);
+
+    transition:
+        transform .45s ease,
+        border-color .45s ease,
+        background .45s ease,
+        box-shadow .45s ease;
+
+    overflow: hidden;
+
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+
+/* subtle light sweep */
+
+.final-special-button::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 80%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.08),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left .9s ease;
+}
+
+
+.final-special-button:hover::before {
+
+    left: 140%;
+
+}
+
+
+.final-special-button:hover {
+
+    transform:
+        translateY(-3px);
+
+    border-color:
+        rgba(211,184,124,0.65);
+
+    background:
+        rgba(211,184,124,0.055);
+
+    box-shadow:
+        0 12px 40px
+        rgba(0,0,0,0.35);
+
+}
+
+
+.final-special-button:active {
+
+    transform:
+        translateY(-1px)
+        scale(.985);
+
+}
+
+
+/* ---------------------------------------------------------
+   ICON
+--------------------------------------------------------- */
+
+.special-icon {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 11px;
+
+    color:
+        rgba(211,184,124,0.9);
+
+    animation:
+        specialSparkle 2.5s ease-in-out infinite;
+}
+
+
+/* ---------------------------------------------------------
+   MAIN TEXT
+--------------------------------------------------------- */
+
+.special-button-main {
+
+    display: block;
+
+    font-family:
+        var(--serif);
+
+    font-size: 19px;
+
+    letter-spacing:
+        .4px;
+
+    line-height: 1.2;
+
+}
+
+
+/* ---------------------------------------------------------
+   SMALL TEXT
+--------------------------------------------------------- */
+
+.special-button-sub {
+
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    text-transform:
+        lowercase;
+
+    color:
+        var(--text-muted);
+
+    transition:
+        color .4s ease,
+        letter-spacing .4s ease;
+}
+
+
+.final-special-button:hover
+.special-button-sub {
+
+    color:
+        var(--text-soft);
+
+    letter-spacing:
+        2.8px;
+
+}
+
+
+/* ---------------------------------------------------------
+   REVEAL BUTTON
+--------------------------------------------------------- */
+
+.reveal-wisher-button {
+
+    opacity: 0;
+
+    transform:
+        translateY(15px);
+}
+
+
+.final-page.loaded
+.reveal-wisher-button {
+
+    animation:
+        finalButtonReveal
+        1s
+        forwards
+        9.8s;
+}
+
+
+/* ---------------------------------------------------------
+   SECRET BUTTON
+--------------------------------------------------------- */
+
+.more-secret-button {
+
+    opacity: 0;
+
+    transform:
+        translateY(15px);
+
+    border-color:
+        rgba(211,184,124,0.18);
+}
+
+
+.final-page.loaded
+.more-secret-button {
+
+    animation:
+        finalButtonReveal
+        1s
+        forwards
+        10.5s;
+}
+
+
+/* ---------------------------------------------------------
+   REPLAY
+--------------------------------------------------------- */
+
+.final-actions
+.replay-button {
+
+    margin-top: 8px;
+
+    opacity: 0;
+}
+
+
+.final-page.loaded
+.final-actions
+.replay-button {
+
+    animation:
+        finalButtonReveal
+        1s
+        forwards
+        11.1s;
+}
+
+
+/* ---------------------------------------------------------
+   BUTTON REVEAL ANIMATION
+--------------------------------------------------------- */
+
+@keyframes finalButtonReveal {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(18px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   SPARKLE
+--------------------------------------------------------- */
+
+@keyframes specialSparkle {
+
+    0%,
+    100% {
+
+        opacity: .45;
+
+        transform:
+            scale(.9)
+            rotate(0deg);
+
+    }
+
+    50% {
+
+        opacity: 1;
+
+        transform:
+            scale(1.15)
+            rotate(15deg);
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+    .final-actions {
+
+        margin-top: 55px;
+
+        gap: 15px;
+
+    }
+
+
+    .final-special-button {
+
+        width: min(
+            100%,
+            330px
+        );
+
+        min-width: 0;
+
+        padding:
+            16px
+            22px
+            14px;
+
+    }
+
+
+    .special-button-main {
+
+        font-size: 17px;
+
+    }
+
+}
+/* =========================================================
+   SPECIAL REVEAL OVERLAYS
+========================================================= */
+
+.special-reveal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99999;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 30px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(32,26,21,.96),
+            rgba(5,5,5,.99) 70%
+        );
+
+    backdrop-filter:
+        blur(18px);
+
+    -webkit-backdrop-filter:
+        blur(18px);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition:
+        opacity .7s ease,
+        visibility .7s ease;
+
+}
+
+
+.special-reveal-overlay.active {
+
+    opacity: 1;
+
+    visibility: visible;
+
+}
+
+
+/* ---------------------------------------------------------
+   CLOSE
+--------------------------------------------------------- */
+
+.special-reveal-close {
+
+    position: absolute;
+
+    top: 28px;
+
+    right: 32px;
+
+    width: 42px;
+
+    height: 42px;
+
+    border: 1px solid
+        rgba(255,255,255,.15);
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,.03);
+
+    color:
+        rgba(255,255,255,.7);
+
+    font-size: 26px;
+
+    font-weight: 200;
+
+    cursor: pointer;
+
+    transition:
+        .35s ease;
+
+}
+
+
+.special-reveal-close:hover {
+
+    color: #fff;
+
+    border-color:
+        rgba(255,255,255,.35);
+
+    transform:
+        rotate(90deg);
+
+}
+
+
+/* ---------------------------------------------------------
+   WISHER
+--------------------------------------------------------- */
+
+.special-reveal-inner {
+
+    width: min(
+        620px,
+        100%
+    );
+
+    text-align: center;
+
+    transform:
+        translateY(30px)
+        scale(.97);
+
+    opacity: 0;
+
+    transition:
+        transform .9s cubic-bezier(.2,.8,.2,1),
+        opacity .9s ease;
+
+}
+
+
+.special-reveal-overlay.active
+.special-reveal-inner {
+
+    transform:
+        translateY(0)
+        scale(1);
+
+    opacity: 1;
+
+}
+
+
+.special-reveal-eyebrow {
+
+    font-size: 9px;
+
+    letter-spacing: 4px;
+
+    color:
+        var(--text-muted);
+
+    margin-bottom: 25px;
+
+}
+
+
+.wisher-photo-wrap {
+
+    width: 180px;
+
+    height: 220px;
+
+    margin:
+        0 auto 25px;
+
+    overflow: hidden;
+
+    border-radius: 3px;
+
+    border: 1px solid
+        rgba(211,184,124,.3);
+
+    box-shadow:
+        0 25px 70px
+        rgba(0,0,0,.55);
+
+}
+
+
+.wisher-photo {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+
+}
+
+
+.special-reveal-small {
+
+    color:
+        var(--text-muted);
+
+    font-size: 10px;
+
+    letter-spacing: 1.5px;
+
+    line-height: 1.7;
+
+}
+
+
+.wisher-name {
+
+    margin:
+        14px 0 6px;
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        clamp(35px,7vw,60px);
+
+    font-weight: 400;
+
+    letter-spacing: 2px;
+
+}
+
+
+.wisher-role {
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
+
+    text-transform:
+        uppercase;
+
+    color:
+        rgba(211,184,124,.8);
+
+}
+
+
+.wisher-message {
+
+    max-width: 480px;
+
+    margin:
+        28px auto 0;
+
+    color:
+        var(--text-soft);
+
+    font-family:
+        var(--serif);
+
+    font-size: 16px;
+
+    line-height: 1.8;
+
+}
+
+
+.special-reveal-signature {
+
+    margin-top: 25px;
+
+    color:
+        var(--text-muted);
+
+    font-family:
+        var(--serif);
+
+    font-style: italic;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   SECRET REVEAL
+========================================================= */
+
+.secret-overlay {
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(29,23,18,.97),
+            rgba(3,3,3,1) 75%
+        );
+
+}
+
+
+.secret-reveal-inner {
+
+    text-align: center;
+
+    width: min(
+        700px,
+        100%
+    );
+
+    transform:
+        scale(.94);
+
+    opacity: 0;
+
+    transition:
+        transform 1s cubic-bezier(.16,1,.3,1),
+        opacity 1s ease;
+
+}
+
+
+.secret-overlay.active
+.secret-reveal-inner {
+
+    transform:
+        scale(1);
+
+    opacity: 1;
+
+}
+
+
+.secret-symbol {
+
+    font-size: 18px;
+
+    color:
+        rgba(211,184,124,.9);
+
+    margin-bottom: 30px;
+
+    animation:
+        specialSparkle
+        2s
+        ease-in-out
+        infinite;
+
+}
+
+
+.secret-small {
+
+    font-size: 9px;
+
+    letter-spacing: 4px;
+
+    color:
+        var(--text-muted);
+
+}
+
+
+.secret-title {
+
+    margin:
+        25px 0 5px;
+
+    font-family:
+        var(--serif);
+
+    font-size:
+        clamp(65px,12vw,130px);
+
+    font-weight: 400;
+
+    line-height: .9;
+
+}
+
+
+.secret-line {
+
+    margin-top: 25px;
+
+    font-family:
+        var(--serif);
+
+    font-style: italic;
+
+    font-size: 21px;
+
+    color:
+        var(--text-soft);
+
+}
+
+
+.secret-divider {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    margin:
+        40px auto;
+
+    color:
+        rgba(211,184,124,.8);
+
+    font-size: 10px;
+
+}
+
+
+.secret-divider span {
+
+    width: 90px;
+
+    height: 1px;
+
+    background:
+        rgba(211,184,124,.2);
+
+}
+
+
+.secret-message {
+
+    max-width: 450px;
+
+    margin:
+        auto;
+
+    font-family:
+        var(--serif);
+
+    font-size: 20px;
+
+    line-height: 1.7;
+
+    color:
+        var(--text-soft);
+
+}
+
+
+.secret-date {
+
+    margin-top: 45px;
+
+    font-family:
+        var(--serif);
+
+    font-size: 24px;
+
+    letter-spacing: 8px;
+
+    color:
+        rgba(211,184,124,.85);
+
+}
+
+
+.secret-footer {
+
+    margin-top: 50px;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    color:
+        var(--text-muted);
+
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+    .special-reveal-overlay {
+
+        padding: 20px;
+
+    }
+
+
+    .special-reveal-close {
+
+        top: 18px;
+
+        right: 18px;
+
+    }
+
+
+    .wisher-photo-wrap {
+
+        width: 150px;
+
+        height: 185px;
+
+    }
+
+
+    .wisher-message {
+
+        font-size: 15px;
+
+        line-height: 1.7;
+
+    }
+
+
+    .secret-title {
+
+        font-size: 70px;
+
+    }
+
+
+    .secret-message {
+
+        font-size: 17px;
+
+    }
+
+
+    .secret-divider span {
+
+        width: 55px;
+
+    }
+
+}
+/* =========================================================
+   FINAL PAGE — BUTTON FIX
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   MAIN FINAL ACTIONS
+--------------------------------------------------------- */
+
+.final-actions {
+
+    margin-top: 60px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 18px;
+
+    position: relative;
+
+    z-index: 20;
+
+}
+
+
+/*
+   IMPORTANT:
+   Buttons are visible immediately.
+   No waiting.
+   No click required.
+*/
+
+.final-actions
+.reveal-wisher-button,
+
+.final-actions
+.replay-button {
+
+    opacity: 1 !important;
+
+    visibility: visible !important;
+
+    transform: translateY(0) !important;
+
+    animation: none !important;
+
+}
+
+
+/* ---------------------------------------------------------
+   REMOVE OLD SECRET BUTTON FROM NORMAL LAYOUT
+--------------------------------------------------------- */
+
+.final-actions
+.more-secret-button {
+
+    display: none !important;
+
+}
+
+
+/* =========================================================
+   MYSTERY CORNER BUTTON
+========================================================= */
+
+.mystery-corner-button {
+
+    position: fixed;
+
+    left: 28px;
+
+    bottom: 28px;
+
+    z-index: 5000;
+
+    width: 150px;
+
+    padding: 11px 14px 10px;
+
+    border:
+
+        1px solid
+        rgba(211,184,124,.28);
+
+    border-radius: 5px;
+
+    background:
+
+        rgba(8,8,8,.72);
+
+    backdrop-filter:
+        blur(10px);
+
+    -webkit-backdrop-filter:
+        blur(10px);
+
+    color:
+        var(--text);
+
+    cursor: pointer;
+
+    text-align: center;
+
+    transition:
+
+        transform .4s ease,
+
+        border-color .4s ease,
+
+        background .4s ease,
+
+        box-shadow .4s ease;
+
+    box-shadow:
+
+        0 8px 30px
+        rgba(0,0,0,.25);
+
+}
+
+
+/* ---------------------------------------------------------
+   MAIN MYSTERY TEXT
+--------------------------------------------------------- */
+
+.mystery-main {
+
+    display: block;
+
+    font-family:
+        var(--serif);
+
+    font-size: 12px;
+
+    letter-spacing:
+        .4px;
+
+    line-height: 1.3;
+
+}
+
+
+/* ---------------------------------------------------------
+   SMALL "CLICK HERE"
+--------------------------------------------------------- */
+
+.mystery-sub {
+
+    display: block;
+
+    margin-top: 4px;
+
+    font-family:
+        var(--sans);
+
+    font-size: 7px;
+
+    letter-spacing:
+        2px;
+
+    text-transform:
+        lowercase;
+
+    color:
+        var(--text-muted);
+
+    transition:
+        color .35s ease,
+
+        letter-spacing .35s ease;
+
+}
+
+
+/* ---------------------------------------------------------
+   HOVER
+--------------------------------------------------------- */
+
+.mystery-corner-button:hover {
+
+    transform:
+        translateY(-3px);
+
+    border-color:
+        rgba(211,184,124,.65);
+
+    background:
+        rgba(25,21,17,.88);
+
+    box-shadow:
+
+        0 12px 35px
+        rgba(0,0,0,.45);
+
+}
+
+
+.mystery-corner-button:hover
+.mystery-sub {
+
+    color:
+        var(--text-soft);
+
+    letter-spacing:
+        2.5px;
+
+}
+
+
+/* ---------------------------------------------------------
+   LITTLE ATTENTION EFFECT
+--------------------------------------------------------- */
+
+.mystery-corner-button::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: -1px;
+
+    border-radius: 5px;
+
+    border:
+        1px solid
+        rgba(211,184,124,.0);
+
+    animation:
+        mysteryPulse
+        3.2s
+        ease-in-out
+        infinite;
+
+    pointer-events: none;
+
+}
+
+
+@keyframes mysteryPulse {
+
+    0%,
+    100% {
+
+        opacity: 0;
+
+        transform:
+            scale(1);
+
+    }
+
+    50% {
+
+        opacity: .65;
+
+        transform:
+            scale(1.035);
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .final-actions {
+
+        margin-top: 45px;
+
+    }
+
+
+    .mystery-corner-button {
+
+        left: 15px;
+
+        bottom: 15px;
+
+        width: 130px;
+
+        padding:
+            9px
+            10px
+            8px;
+
+    }
+
+
+    .mystery-main {
+
+        font-size: 10px;
+
+    }
+
+
+    .mystery-sub {
+
+        font-size: 6px;
+
+        letter-spacing:
+            1.6px;
+
+    }
+
+}
