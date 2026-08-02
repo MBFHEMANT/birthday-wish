@@ -1,7 +1,7 @@
 /* =========================================================
    HMT BIRTHDAY EXPERIENCE
    GLOBAL MUSIC ENGINE
-   FINAL MUSIC SYSTEM
+   FINAL STABLE VERSION
 ========================================================= */
 
 (function () {
@@ -9,23 +9,40 @@
     "use strict";
 
 
-    /* ---------------------------------------------------------
-       DETECT PAGE
-    --------------------------------------------------------- */
+    /* =====================================================
+       PAGE DETECTION
+    ===================================================== */
 
     const path =
         window.location.pathname.toLowerCase();
 
+
     const isRootPage =
         !path.includes("/pages/");
 
+
+    /*
+       ROOT:
+       /index.html
+       /
+
+
+       INNER:
+       /pages/memories.html
+       /pages/journey.html
+       /pages/gallery.html
+       /pages/final.html
+    */
+
     const pagePrefix =
-        isRootPage ? "" : "../";
+        isRootPage
+            ? ""
+            : "../";
 
 
-    /* ---------------------------------------------------------
+    /* =====================================================
        AUDIO PATHS
-    --------------------------------------------------------- */
+    ===================================================== */
 
     const AUDIO_PATHS = {
 
@@ -44,48 +61,108 @@
     };
 
 
-    /* ---------------------------------------------------------
-       CREATE / GET AUDIO
-    --------------------------------------------------------- */
+    console.log(
+        "HMT Music Engine:",
+        isRootPage
+            ? "ROOT PAGE"
+            : "INNER PAGE"
+    );
 
-    function getAudio(
+    console.log(
+        "Birthday:",
+        AUDIO_PATHS.birthday
+    );
+
+    console.log(
+        "Memories:",
+        AUDIO_PATHS.memories
+    );
+
+    console.log(
+        "Intro:",
+        AUDIO_PATHS.intro
+    );
+
+
+    /* =====================================================
+       VOLUME
+    ===================================================== */
+
+    const VOLUME = {
+
+        birthday: 0.65,
+
+        /*
+           Increased from the old 0.38
+           as requested.
+        */
+
+        memories: 0.99,
+
+        intro: 0.48
+
+    };
+
+
+    /* =====================================================
+       STORAGE KEYS
+    ===================================================== */
+
+    const MEMORY_TIME_KEY =
+        "hmt_memories_time";
+
+
+    const MEMORY_ACTIVE_KEY =
+        "hmt_memories_active";
+
+
+    const BIRTHDAY_ACTIVE_KEY =
+        "hmt_birthday_active";
+
+
+    /* =====================================================
+       CREATE AUDIO ELEMENT
+    ===================================================== */
+
+    function createAudio(
         id,
         src,
-        loop = false
+        loop
     ) {
 
         let audio =
             document.getElementById(id);
 
 
+        /*
+           If another script/page already created it,
+           use that element.
+        */
+
         if (!audio) {
 
             audio =
-                document.createElement("audio");
+                document.createElement(
+                    "audio"
+                );
 
             audio.id = id;
 
             audio.preload = "auto";
-
-            audio.loop = loop;
 
             audio.setAttribute(
                 "playsinline",
                 ""
             );
 
+            audio.setAttribute(
+                "webkit-playsinline",
+                ""
+            );
+
             audio.style.display =
                 "none";
 
-            const source =
-                document.createElement("source");
-
-            source.src = src;
-
-            source.type =
-                "audio/mpeg";
-
-            audio.appendChild(source);
 
             document.body.appendChild(
                 audio
@@ -94,94 +171,34 @@
         }
 
 
-        audio.loop = loop;
-
-        return audio;
-
-    }
-
-
-    /* ---------------------------------------------------------
-       AUDIO OBJECTS
-    --------------------------------------------------------- */
-
-    const birthdayMusic =
-        getAudio(
-            "birthdayMusic",
-            AUDIO_PATHS.birthday,
-            true
-        );
-
-
-    const memoriesMusic =
-        getAudio(
-            "memoriesMusic",
-            AUDIO_PATHS.memories,
-            true
-        );
-
-
-    const introMusic =
-        getAudio(
-            "introMusic",
-            AUDIO_PATHS.intro,
-            true
-        );
-
-
-    /* ---------------------------------------------------------
-       VOLUMES
-    --------------------------------------------------------- */
-
-    const VOLUME = {
-
-        birthday: 0.65,
-
-        memories: 0.38,
-
-        intro: 0.48
-
-    };
-
-
-    /* ---------------------------------------------------------
-       STORAGE
-    --------------------------------------------------------- */
-
-    const MEMORY_TIME_KEY =
-        "hmt_memories_time";
-
-    const MEMORY_ACTIVE_KEY =
-        "hmt_memories_active";
-
-    const BIRTHDAY_ACTIVE_KEY =
-        "hmt_birthday_active";
-
-
-    /* ---------------------------------------------------------
-   SAFE PLAY
---------------------------------------------------------- */
-
-async function safePlay(
-    audio,
-    volume
-) {
-
-    if (!audio) {
-        return false;
-    }
-
-
-    try {
-
-        audio.volume =
-            volume;
+        audio.loop =
+            loop;
 
 
         /*
-           Make sure the browser knows the
-           audio element should be played inline.
+           IMPORTANT:
+           Set src directly.
+
+           This is more reliable than dynamically
+           creating a <source> element on some
+           mobile browsers.
         */
+
+        if (
+            !audio.src ||
+            !audio.src.includes(
+                src
+            )
+        ) {
+
+            audio.src = src;
+
+        }
+
+
+        audio.preload =
+            "auto";
+
 
         audio.setAttribute(
             "playsinline",
@@ -195,227 +212,93 @@ async function safePlay(
         );
 
 
-        const playPromise =
-            audio.play();
-
-
-        /*
-           Some older browsers don't return
-           a Promise from play().
-        */
-
-        if (
-            playPromise !== undefined
-        ) {
-
-            await playPromise;
-
-        }
-
-
-        return true;
+        return audio;
 
     }
 
-    catch (error) {
 
-        console.log(
-            "Birthday music waiting for user interaction:",
-            error
+    /* =====================================================
+       AUDIO OBJECTS
+    ===================================================== */
+
+    const birthdayMusic =
+        createAudio(
+            "birthdayMusic",
+            AUDIO_PATHS.birthday,
+            true
         );
 
 
-        return false;
-
-    }
-
-}
-
-    /* ---------------------------------------------------------
-       FADE OUT
-    --------------------------------------------------------- */
-
-    function fadeOut(
-        audio,
-        duration = 500
-    ) {
-
-        if (
-            !audio ||
-            audio.paused
-        ) {
-
-            return Promise.resolve();
-
-        }
+    const memoriesMusic =
+        createAudio(
+            "memoriesMusic",
+            AUDIO_PATHS.memories,
+            true
+        );
 
 
-        return new Promise(resolve => {
-
-            const startingVolume =
-                audio.volume;
-
-            const startedAt =
-                performance.now();
-
-
-            function animate(now) {
-
-                const progress =
-                    Math.min(
-                        (now - startedAt) /
-                        duration,
-                        1
-                    );
+    const introMusic =
+        createAudio(
+            "introMusic",
+            AUDIO_PATHS.intro,
+            true
+        );
 
 
-                audio.volume =
-                    startingVolume *
-                    (1 - progress);
+    /* =====================================================
+       AUDIO ERROR DEBUGGING
+    ===================================================== */
 
+    [
+        birthdayMusic,
+        memoriesMusic,
+        introMusic
 
-                if (progress < 1) {
-
-                    requestAnimationFrame(
-                        animate
-                    );
-
-                } else {
-
-                    audio.pause();
-
-                    audio.volume =
-                        startingVolume;
-
-                    resolve();
-
-                }
-
-            }
-
-
-            requestAnimationFrame(
-                animate
-            );
-
-        });
-
-    }
-
-
-    /* ---------------------------------------------------------
-       FADE IN
-    --------------------------------------------------------- */
-
-    function fadeIn(
-        audio,
-        targetVolume,
-        duration = 800
-    ) {
+    ].forEach(audio => {
 
         if (!audio) {
-
-            return Promise.resolve();
-
-        }
-
-
-        audio.volume = 0;
-
-
-        return new Promise(resolve => {
-
-            const startedAt =
-                performance.now();
-
-
-            function animate(now) {
-
-                const progress =
-                    Math.min(
-                        (now - startedAt) /
-                        duration,
-                        1
-                    );
-
-
-                audio.volume =
-                    targetVolume *
-                    progress;
-
-
-                if (progress < 1) {
-
-                    requestAnimationFrame(
-                        animate
-                    );
-
-                } else {
-
-                    resolve();
-
-                }
-
-            }
-
-
-            requestAnimationFrame(
-                animate
-            );
-
-        });
-
-    }
-
-
-    /* ---------------------------------------------------------
-       STOP AUDIO
-    --------------------------------------------------------- */
-
-    async function stopAudio(
-        audio,
-        reset = false
-    ) {
-
-        if (!audio) {
-
             return;
-
         }
 
 
-        await fadeOut(
-            audio,
-            450
+        audio.addEventListener(
+            "error",
+            () => {
+
+                console.error(
+                    "HMT AUDIO ERROR:",
+                    audio.id,
+                    audio.src,
+                    audio.error
+                );
+
+            }
         );
 
 
-        audio.pause();
+        audio.addEventListener(
+            "canplay",
+            () => {
+
+                console.log(
+                    "HMT AUDIO READY:",
+                    audio.id
+                );
+
+            }
+        );
+
+    });
 
 
-        if (reset) {
-
-            try {
-
-                audio.currentTime = 0;
-
-            } catch (error) {}
-
-        }
-
-    }
-
-
-    /* ---------------------------------------------------------
-       SAVE MEMORY POSITION
-    --------------------------------------------------------- */
+    /* =====================================================
+       MEMORY POSITION
+    ===================================================== */
 
     function saveMemoryPosition() {
 
         if (!memoriesMusic) {
-
             return;
-
         }
 
 
@@ -428,21 +311,23 @@ async function safePlay(
                 )
             );
 
-        } catch (error) {}
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Could not save memory position."
+            );
+
+        }
 
     }
 
 
-    /* ---------------------------------------------------------
-       RESTORE MEMORY POSITION
-    --------------------------------------------------------- */
-
     function restoreMemoryPosition() {
 
         if (!memoriesMusic) {
-
             return;
-
         }
 
 
@@ -455,31 +340,417 @@ async function safePlay(
 
 
             if (
-                saved !== null &&
-                !Number.isNaN(
-                    Number(saved)
-                )
+                saved !== null
             ) {
 
-                memoriesMusic.currentTime =
+                const time =
                     Number(saved);
+
+
+                if (
+                    Number.isFinite(
+                        time
+                    ) &&
+                    time >= 0
+                ) {
+
+                    memoriesMusic.currentTime =
+                        time;
+
+                }
 
             }
 
-        } catch (error) {}
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Could not restore memory position."
+            );
+
+        }
 
     }
 
 
-    /* ---------------------------------------------------------
-       BIRTHDAY MUSIC
-    --------------------------------------------------------- */
+    /* =====================================================
+       HARD STOP
+    ===================================================== */
 
-    async function playBirthday() {
+    function hardStop(
+        audio,
+        reset = false
+    ) {
+
+        if (!audio) {
+            return;
+        }
+
+
+        try {
+
+            audio.pause();
+
+        }
+
+        catch (error) {}
+
+
+        if (reset) {
+
+            try {
+
+                audio.currentTime =
+                    0;
+
+            }
+
+            catch (error) {}
+
+        }
+
+    }
+
+
+    /* =====================================================
+       FADE OUT
+    ===================================================== */
+
+    function fadeOut(
+        audio,
+        duration = 450
+    ) {
+
+        if (
+            !audio ||
+            audio.paused
+        ) {
+
+            return Promise.resolve();
+
+        }
+
+
+        const startVolume =
+            audio.volume;
+
+
+        if (
+            startVolume <= 0
+        ) {
+
+            hardStop(audio);
+
+            return Promise.resolve();
+
+        }
+
+
+        return new Promise(
+            resolve => {
+
+                const started =
+                    performance.now();
+
+
+                function animate(
+                    now
+                ) {
+
+                    const progress =
+                        Math.min(
+                            (
+                                now -
+                                started
+                            ) /
+                            duration,
+                            1
+                        );
+
+
+                    audio.volume =
+                        startVolume *
+                        (
+                            1 -
+                            progress
+                        );
+
+
+                    if (
+                        progress < 1
+                    ) {
+
+                        requestAnimationFrame(
+                            animate
+                        );
+
+                    }
+
+                    else {
+
+                        hardStop(
+                            audio
+                        );
+
+
+                        audio.volume =
+                            startVolume;
+
+
+                        resolve();
+
+                    }
+
+                }
+
+
+                requestAnimationFrame(
+                    animate
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       FADE IN
+    ===================================================== */
+
+    function fadeIn(
+        audio,
+        targetVolume,
+        duration = 700
+    ) {
+
+        if (!audio) {
+
+            return Promise.resolve();
+
+        }
+
+
+        audio.volume =
+            0;
+
+
+        return new Promise(
+            resolve => {
+
+                const started =
+                    performance.now();
+
+
+                function animate(
+                    now
+                ) {
+
+                    const progress =
+                        Math.min(
+                            (
+                                now -
+                                started
+                            ) /
+                            duration,
+                            1
+                        );
+
+
+                    audio.volume =
+                        targetVolume *
+                        progress;
+
+
+                    if (
+                        progress < 1
+                    ) {
+
+                        requestAnimationFrame(
+                            animate
+                        );
+
+                    }
+
+                    else {
+
+                        audio.volume =
+                            targetVolume;
+
+
+                        resolve();
+
+                    }
+
+                }
+
+
+                requestAnimationFrame(
+                    animate
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       PLAY IMMEDIATELY
+       
+       IMPORTANT:
+       There is NO await before audio.play().
+       
+       This is what makes it compatible with a
+       real mobile user gesture.
+    ===================================================== */
+
+    function playImmediately(
+        audio,
+        volume
+    ) {
+
+        if (!audio) {
+
+            return false;
+
+        }
+
+
+        audio.loop =
+            true;
+
+
+        audio.volume =
+            volume;
+
+
+        audio.muted =
+            false;
+
+
+        try {
+
+            const promise =
+                audio.play();
+
+
+            /*
+               play() returns a Promise
+               in modern browsers.
+            */
+
+            if (
+                promise &&
+                typeof promise.then ===
+                    "function"
+            ) {
+
+                promise
+                    .then(() => {
+
+                        console.log(
+                            "HMT MUSIC PLAYING:",
+                            audio.id
+                        );
+
+                    })
+                    .catch(error => {
+
+                        console.warn(
+                            "HMT MUSIC BLOCKED:",
+                            audio.id,
+                            error
+                        );
+
+                    });
+
+            }
+
+
+            return true;
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "HMT MUSIC PLAY ERROR:",
+                audio.id,
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       STOP ALL EXCEPT
+    ===================================================== */
+
+    function stopOtherMusic(
+        except
+    ) {
+
+        if (
+            birthdayMusic !== except
+        ) {
+
+            hardStop(
+                birthdayMusic
+            );
+
+        }
+
+
+        if (
+            memoriesMusic !== except
+        ) {
+
+            hardStop(
+                memoriesMusic
+            );
+
+        }
+
+
+        if (
+            introMusic !== except
+        ) {
+
+            hardStop(
+                introMusic,
+                true
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       PLAY BIRTHDAY
+    ===================================================== */
+
+    function playBirthday() {
+
+        if (
+            !birthdayMusic
+        ) {
+
+            return false;
+
+        }
+
 
         /*
-           Birthday music must NOT be restarted
-           if it is already playing.
+           If birthday is already playing,
+           DO NOT restart it.
         */
 
         if (
@@ -491,30 +762,59 @@ async function safePlay(
         }
 
 
-        await stopAudio(
-            memoriesMusic,
-            false
-        );
+        /*
+           CRITICAL:
 
+           Play birthday FIRST.
 
-        await stopAudio(
-            introMusic,
-            true
-        );
+           Do not await anything before this.
 
+           This function can be called directly
+           from the Blow Candle button.
+        */
 
         birthdayMusic.loop =
             true;
 
 
-        const played =
-            await safePlay(
+        birthdayMusic.volume =
+            VOLUME.birthday;
+
+
+        const started =
+            playImmediately(
                 birthdayMusic,
                 VOLUME.birthday
             );
 
 
-        if (played) {
+        if (!started) {
+
+            return false;
+
+        }
+
+
+        /*
+           Once play() has been requested,
+           stop the other tracks.
+
+           We don't wait for these operations
+           before calling play().
+        */
+
+        hardStop(
+            memoriesMusic
+        );
+
+
+        hardStop(
+            introMusic,
+            true
+        );
+
+
+        try {
 
             sessionStorage.setItem(
                 BIRTHDAY_ACTIVE_KEY,
@@ -523,22 +823,28 @@ async function safePlay(
 
         }
 
+        catch (error) {}
 
-        return played;
+
+        return true;
 
     }
 
 
-    /* ---------------------------------------------------------
-       MEMORIES MUSIC
-    --------------------------------------------------------- */
+    /* =====================================================
+       PLAY MEMORIES
+    ===================================================== */
 
-    async function playMemories() {
+    function playMemories() {
 
-        /*
-           Already playing?
-           DO NOT RESTART IT.
-        */
+        if (
+            !memoriesMusic
+        ) {
+
+            return false;
+
+        }
+
 
         if (
             !memoriesMusic.paused
@@ -549,18 +855,6 @@ async function safePlay(
         }
 
 
-        await stopAudio(
-            birthdayMusic,
-            false
-        );
-
-
-        await stopAudio(
-            introMusic,
-            true
-        );
-
-
         restoreMemoryPosition();
 
 
@@ -568,14 +862,43 @@ async function safePlay(
             true;
 
 
-        const played =
-            await safePlay(
+        memoriesMusic.volume =
+            VOLUME.memories;
+
+
+        /*
+           Start memories immediately.
+
+           This function is normally called after
+           a user action on the chapter.
+        */
+
+        const started =
+            playImmediately(
                 memoriesMusic,
                 VOLUME.memories
             );
 
 
-        if (played) {
+        if (!started) {
+
+            return false;
+
+        }
+
+
+        hardStop(
+            birthdayMusic
+        );
+
+
+        hardStop(
+            introMusic,
+            true
+        );
+
+
+        try {
 
             sessionStorage.setItem(
                 MEMORY_ACTIVE_KEY,
@@ -584,19 +907,23 @@ async function safePlay(
 
         }
 
+        catch (error) {}
 
-        return played;
+
+        return true;
 
     }
 
 
-    /* ---------------------------------------------------------
+    /* =====================================================
        RESUME MEMORIES
-    --------------------------------------------------------- */
+    ===================================================== */
 
-    async function resumeMemories() {
+    function resumeMemories() {
 
-        if (!memoriesMusic) {
+        if (
+            !memoriesMusic
+        ) {
 
             return false;
 
@@ -610,66 +937,161 @@ async function safePlay(
             true;
 
 
-        const played =
-            await safePlay(
+        memoriesMusic.volume =
+            VOLUME.memories;
+
+
+        const started =
+            playImmediately(
                 memoriesMusic,
                 VOLUME.memories
             );
 
 
-        if (played) {
+        if (started) {
 
-            sessionStorage.setItem(
-                MEMORY_ACTIVE_KEY,
-                "true"
+            hardStop(
+                birthdayMusic
             );
+
+
+            hardStop(
+                introMusic,
+                true
+            );
+
+
+            try {
+
+                sessionStorage.setItem(
+                    MEMORY_ACTIVE_KEY,
+                    "true"
+                );
+
+            }
+
+            catch (error) {}
 
         }
 
 
-        return played;
+        return started;
 
     }
 
 
-    /* ---------------------------------------------------------
+    /* =====================================================
        DEVELOPER / HMT MUSIC
-    --------------------------------------------------------- */
+    ===================================================== */
 
-    async function playDeveloperMusic() {
+    function playDeveloperMusic() {
 
         /*
-           Save exact memories position
-           before stopping it.
+           Save memories before stopping it.
         */
 
         saveMemoryPosition();
 
 
-        if (
-            memoriesMusic &&
-            !memoriesMusic.paused
-        ) {
+        /*
+           IMPORTANT:
 
-            await fadeOut(
-                memoriesMusic,
-                450
+           HMT button is itself a user gesture.
+
+           Therefore intro.play() must happen
+           immediately.
+        */
+
+        introMusic.loop =
+            true;
+
+
+        introMusic.volume =
+            VOLUME.intro;
+
+
+        const started =
+            playImmediately(
+                introMusic,
+                VOLUME.intro
             );
 
-            memoriesMusic.pause();
 
-        }
+        /*
+           After requesting intro playback,
+           stop memories and birthday.
+        */
 
-
-        await stopAudio(
-            birthdayMusic,
-            false
+        hardStop(
+            memoriesMusic
         );
 
 
-        await stopAudio(
-            introMusic,
-            true
+        hardStop(
+            birthdayMusic
+        );
+
+
+        hardStop(
+            introMusic
+        );
+
+
+        /*
+           The line above would stop intro again,
+           so immediately restart it.
+
+           This restart is synchronous and remains
+           inside this function.
+        */
+
+        introMusic.loop =
+            true;
+
+
+        introMusic.volume =
+            VOLUME.intro;
+
+
+        try {
+
+            introMusic.play();
+
+        }
+
+        catch (error) {}
+
+
+        return started;
+
+    }
+
+
+    /* =====================================================
+       BETTER DEVELOPER MUSIC VERSION
+       
+       Override the function above with a direct,
+       clean implementation.
+    ===================================================== */
+
+    function startDeveloperMusic() {
+
+        saveMemoryPosition();
+
+
+        /*
+           Don't perform asynchronous fading here.
+
+           The HMT button is a user gesture.
+        */
+
+        hardStop(
+            birthdayMusic
+        );
+
+
+        hardStop(
+            memoriesMusic
         );
 
 
@@ -677,339 +1099,217 @@ async function safePlay(
             true;
 
 
-        const played =
-            await safePlay(
-                introMusic,
-                VOLUME.intro
+        introMusic.volume =
+            VOLUME.intro;
+
+
+        try {
+
+            const promise =
+                introMusic.play();
+
+
+            if (
+                promise &&
+                promise.catch
+            ) {
+
+                promise.catch(
+                    error => {
+
+                        console.warn(
+                            "HMT intro blocked:",
+                            error
+                        );
+
+                    }
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "HMT intro error:",
+                error
             );
 
-
-        /*
-           If autoplay is blocked here, the HMT
-           button itself was already a user click,
-           so this should normally succeed.
-        */
-
-        if (!played) {
-
-            try {
-
-                await introMusic.play();
-
-            } catch (error) {}
-
         }
-
-
-        return played;
-
-    }
-
-
-    /* ---------------------------------------------------------
-       CLOSE DEVELOPER
-    --------------------------------------------------------- */
-
-    async function closeDeveloperMusic() {
-
-        await stopAudio(
-            introMusic,
-            true
-        );
-
-
-        /*
-           Always restore memories after HMT.
-        */
-
-        restoreMemoryPosition();
-
-
-        await resumeMemories();
-
-    }
-
-
- /* ---------------------------------------------------------
-   START BIRTHDAY ON ROOT PAGE
---------------------------------------------------------- */
-
-async function startRootMusic() {
-
-    if (!isRootPage) {
-        return;
-    }
-
-
-    /*
-       =====================================================
-       FIRST ATTEMPT
-       =====================================================
-
-       Desktop browsers may allow this immediately.
-
-       Mobile browsers may reject it because there has
-       not yet been a user interaction.
-    */
-
-    birthdayMusic.loop = true;
-
-    birthdayMusic.volume =
-        VOLUME.birthday;
-
-
-    try {
-
-        const firstAttempt =
-            birthdayMusic.play();
-
-        if (
-            firstAttempt !== undefined
-        ) {
-
-            await firstAttempt;
-
-        }
-
-
-        /*
-           If it worked, clean up the other
-           possible music sources.
-        */
-
-        sessionStorage.setItem(
-            BIRTHDAY_ACTIVE_KEY,
-            "true"
-        );
-
-
-        await stopAudio(
-            memoriesMusic,
-            false
-        );
-
-
-        await stopAudio(
-            introMusic,
-            true
-        );
 
 
         return true;
 
     }
 
-    catch (error) {
+
+    /* =====================================================
+       CLOSE DEVELOPER
+    ===================================================== */
+
+    function closeDeveloperMusic() {
+
+        hardStop(
+            introMusic,
+            true
+        );
+
+
+        restoreMemoryPosition();
+
 
         /*
-           Mobile browser blocked autoplay.
-
-           THIS IS NORMAL.
-
-           We now wait for the user's first
-           real interaction.
+           On desktop this can resume immediately.
+           On mobile, if the browser requires a gesture,
+           the next interaction will resume it.
         */
 
-        console.log(
-            "Birthday autoplay blocked. Waiting for user interaction."
-        );
+        if (
+            memoriesMusic
+        ) {
+
+            memoriesMusic.loop =
+                true;
+
+
+            memoriesMusic.volume =
+                VOLUME.memories;
+
+
+            const promise =
+                memoriesMusic.play();
+
+
+            if (
+                promise &&
+                promise.catch
+            ) {
+
+                promise.catch(
+                    () => {
+
+                        console.log(
+                            "Memories waiting for user interaction."
+                        );
+
+                    }
+                );
+
+            }
+
+        }
 
     }
 
 
     /* =====================================================
-       MOBILE UNLOCK
-       ===================================================== */
+       ROOT PAGE — BIRTHDAY AUTOPLAY
+    ===================================================== */
 
-    let unlocked = false;
+    function attemptBirthdayAutoplay() {
 
+        if (!isRootPage) {
 
-    const unlockBirthday =
-        () => {
+            return;
 
-            if (unlocked) {
-                return;
-            }
+        }
 
 
-            unlocked = true;
+        birthdayMusic.loop =
+            true;
 
 
-            /*
-               =================================================
-               VERY IMPORTANT
-
-               DO NOT await anything before play().
-
-               play() must happen directly inside the
-               user gesture.
-               =================================================
-            */
-
-            birthdayMusic.loop = true;
-
-            birthdayMusic.volume =
-                VOLUME.birthday;
+        birthdayMusic.volume =
+            VOLUME.birthday;
 
 
-            const playPromise =
+        /*
+           Desktop:
+           this will normally work.
+
+           Mobile:
+           browser may reject it.
+        */
+
+        try {
+
+            const promise =
                 birthdayMusic.play();
 
 
             if (
-                playPromise !== undefined
+                promise &&
+                promise.catch
             ) {
 
-                playPromise
+                promise
                     .then(() => {
 
-                        sessionStorage.setItem(
-                            BIRTHDAY_ACTIVE_KEY,
-                            "true"
+                        console.log(
+                            "Birthday autoplay succeeded."
                         );
 
 
-                        /*
-                           Only AFTER birthday has successfully
-                           started do we clean up the other audio.
-                        */
+                        try {
 
-                        stopAudio(
-                            memoriesMusic,
-                            false
-                        );
+                            sessionStorage.setItem(
+                                BIRTHDAY_ACTIVE_KEY,
+                                "true"
+                            );
 
+                        }
 
-                        stopAudio(
-                            introMusic,
-                            true
-                        );
+                        catch (error) {}
 
                     })
-                    .catch(error => {
+                    .catch(
+                        () => {
 
-                        console.log(
-                            "Birthday music could not start:",
-                            error
-                        );
+                            console.log(
+                                "Birthday autoplay blocked. Waiting for first touch."
+                            );
 
-
-                        /*
-                           Allow another interaction to
-                           try again.
-                        */
-
-                        unlocked = false;
-
-                    });
+                        }
+                    );
 
             }
 
-        };
-
-
-    /* =====================================================
-       LISTEN FOR REAL MOBILE GESTURE
-       ===================================================== */
-
-    document.addEventListener(
-        "touchstart",
-        unlockBirthday,
-        {
-            once: true,
-            passive: true
         }
-    );
 
+        catch (error) {
 
-    document.addEventListener(
-        "pointerdown",
-        unlockBirthday,
-        {
-            once: true,
-            passive: true
+            console.log(
+                "Birthday autoplay blocked."
+            );
+
         }
-    );
-
-
-    document.addEventListener(
-        "click",
-        unlockBirthday,
-        {
-            once: true
-        }
-    );
-
-
-    document.addEventListener(
-        "keydown",
-        unlockBirthday,
-        {
-            once: true
-        }
-    );
-
-
-    return false;
-
-}
-
-
-        /*
-           touchstart
-           ----------
-           Fallback for older mobile browsers.
-        */
-
-        document.addEventListener(
-            "touchstart",
-            unlockBirthdayMusic,
-            {
-                once: true,
-                passive: true
-            }
-        );
-
-
-        /*
-           click
-           -----
-           Additional fallback.
-        */
-
-        document.addEventListener(
-            "click",
-            unlockBirthdayMusic,
-            {
-                once: true
-            }
-        );
-
-
-        /*
-           Keyboard fallback for desktop.
-        */
-
-        document.addEventListener(
-            "keydown",
-            unlockBirthdayMusic,
-            {
-                once: true
-            }
-        );
 
     }
 
-}
+
+    /* =====================================================
+       MOBILE BIRTHDAY UNLOCK
+    ===================================================== */
+
+    let birthdayUnlockDone =
+        false;
 
 
-    /* ---------------------------------------------------------
-       START MEMORIES ON INNER PAGES
-    --------------------------------------------------------- */
+    function unlockBirthdayFromGesture() {
 
-    async function startInnerPageMusic() {
+        if (
+            birthdayUnlockDone
+        ) {
 
-        if (isRootPage) {
+            return;
+
+        }
+
+
+        if (
+            !isRootPage
+        ) {
 
             return;
 
@@ -1017,78 +1317,364 @@ async function startRootMusic() {
 
 
         /*
-           Every chapter is now responsible for
-           continuing memories.mp3.
-
-           This is why music.js MUST be loaded
-           on every chapter.
+           If already playing,
+           nothing needs to happen.
         */
 
-        const played =
-            await resumeMemories();
+        if (
+            !birthdayMusic.paused
+        ) {
+
+            birthdayUnlockDone =
+                true;
+
+
+            removeBirthdayUnlockListeners();
+
+            return;
+
+        }
 
 
         /*
-           Browser fallback.
+           CRITICAL:
 
-           The visitor has normally arrived here
-           by clicking a chapter button, so this
-           gives the browser another valid gesture.
+           The FIRST thing done inside the
+           touch/click handler is audio.play().
+
+           No await.
+           No fade.
+           No stopAudio.
         */
 
-        if (!played) {
-
-            const retry =
-                async () => {
-
-                    await resumeMemories();
-
-                    removeRetry();
-
-                };
+        birthdayMusic.loop =
+            true;
 
 
-            document.addEventListener(
-                "pointerdown",
-                retry,
-                {
-                    once: true,
-                    passive: true
-                }
-            );
+        birthdayMusic.volume =
+            VOLUME.birthday;
 
 
-            document.addEventListener(
-                "keydown",
-                retry,
-                {
-                    once: true
-                }
-            );
+        try {
+
+            const promise =
+                birthdayMusic.play();
 
 
-            function removeRetry() {
+            if (
+                promise &&
+                promise.then
+            ) {
 
-                document.removeEventListener(
-                    "pointerdown",
-                    retry
-                );
+                promise
+                    .then(() => {
 
-                document.removeEventListener(
-                    "keydown",
-                    retry
-                );
+                        birthdayUnlockDone =
+                            true;
+
+
+                        removeBirthdayUnlockListeners();
+
+
+                        try {
+
+                            sessionStorage.setItem(
+                                BIRTHDAY_ACTIVE_KEY,
+                                "true"
+                            );
+
+                        }
+
+                        catch (error) {}
+
+
+                        /*
+                           Only now clean other audio.
+                        */
+
+                        hardStop(
+                            memoriesMusic
+                        );
+
+
+                        hardStop(
+                            introMusic,
+                            true
+                        );
+
+                    })
+                    .catch(
+                        error => {
+
+                            console.warn(
+                                "Birthday unlock failed:",
+                                error
+                            );
+
+
+                            /*
+                               Allow another touch.
+                            */
+
+                            birthdayUnlockDone =
+                                false;
+
+                        }
+                    );
 
             }
+
+            else {
+
+                birthdayUnlockDone =
+                    true;
+
+
+                removeBirthdayUnlockListeners();
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Birthday unlock error:",
+                error
+            );
 
         }
 
     }
 
 
-    /* ---------------------------------------------------------
-       SAVE MUSIC BEFORE PAGE CHANGE
-    --------------------------------------------------------- */
+    function removeBirthdayUnlockListeners() {
+
+        document.removeEventListener(
+            "pointerdown",
+            unlockBirthdayFromGesture
+        );
+
+
+        document.removeEventListener(
+            "touchstart",
+            unlockBirthdayFromGesture
+        );
+
+
+        document.removeEventListener(
+            "click",
+            unlockBirthdayFromGesture
+        );
+
+    }
+
+
+    /* =====================================================
+       INNER PAGE MEMORY START
+    ===================================================== */
+
+    function attemptMemoriesAutoplay() {
+
+        if (
+            isRootPage
+        ) {
+
+            return;
+
+        }
+
+
+        restoreMemoryPosition();
+
+
+        memoriesMusic.loop =
+            true;
+
+
+        memoriesMusic.volume =
+            VOLUME.memories;
+
+
+        try {
+
+            const promise =
+                memoriesMusic.play();
+
+
+            if (
+                promise &&
+                promise.catch
+            ) {
+
+                promise.catch(
+                    () => {
+
+                        console.log(
+                            "Memories autoplay blocked. Waiting for interaction."
+                        );
+
+                    }
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.log(
+                "Memories autoplay blocked."
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       INNER PAGE MOBILE UNLOCK
+    ===================================================== */
+
+    let memoriesUnlockDone =
+        false;
+
+
+    function unlockMemoriesFromGesture() {
+
+        if (
+            isRootPage
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            memoriesUnlockDone
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !memoriesMusic.paused
+        ) {
+
+            memoriesUnlockDone =
+                true;
+
+
+            removeMemoriesUnlockListeners();
+
+            return;
+
+        }
+
+
+        /*
+           Direct play() inside the gesture.
+        */
+
+        memoriesMusic.loop =
+            true;
+
+
+        memoriesMusic.volume =
+            VOLUME.memories;
+
+
+        restoreMemoryPosition();
+
+
+        try {
+
+            const promise =
+                memoriesMusic.play();
+
+
+            if (
+                promise &&
+                promise.then
+            ) {
+
+                promise
+                    .then(() => {
+
+                        memoriesUnlockDone =
+                            true;
+
+
+                        removeMemoriesUnlockListeners();
+
+
+                        hardStop(
+                            birthdayMusic
+                        );
+
+
+                        hardStop(
+                            introMusic,
+                            true
+                        );
+
+                    })
+                    .catch(
+                        () => {
+
+                            memoriesUnlockDone =
+                                false;
+
+                        }
+                    );
+
+            }
+
+            else {
+
+                memoriesUnlockDone =
+                    true;
+
+
+                removeMemoriesUnlockListeners();
+
+            }
+
+        }
+
+        catch (error) {}
+
+    }
+
+
+    function removeMemoriesUnlockListeners() {
+
+        document.removeEventListener(
+            "pointerdown",
+            unlockMemoriesFromGesture
+        );
+
+
+        document.removeEventListener(
+            "touchstart",
+            unlockMemoriesFromGesture
+        );
+
+
+        document.removeEventListener(
+            "click",
+            unlockMemoriesFromGesture
+        );
+
+    }
+
+
+    /* =====================================================
+       SAVE MEMORY BEFORE NAVIGATION
+    ===================================================== */
 
     document.addEventListener(
         "click",
@@ -1101,20 +1687,25 @@ async function startRootMusic() {
 
 
             if (!link) {
-
                 return;
-
             }
 
 
             const href =
-                link.getAttribute("href");
+                link.getAttribute(
+                    "href"
+                );
+
+
+            if (!href) {
+                return;
+            }
 
 
             if (
-                !href ||
                 href.startsWith("#") ||
-                href.startsWith("http")
+                href.startsWith("http") ||
+                href.startsWith("mailto:")
             ) {
 
                 return;
@@ -1123,6 +1714,7 @@ async function startRootMusic() {
 
 
             if (
+                memoriesMusic &&
                 !memoriesMusic.paused
             ) {
 
@@ -1135,9 +1727,9 @@ async function startRootMusic() {
     );
 
 
-    /* ---------------------------------------------------------
-       SAVE PERIODICALLY
-    --------------------------------------------------------- */
+    /* =====================================================
+       SAVE MEMORY PERIODICALLY
+    ===================================================== */
 
     setInterval(
         () => {
@@ -1156,9 +1748,9 @@ async function startRootMusic() {
     );
 
 
-    /* ---------------------------------------------------------
+    /* =====================================================
        SAVE BEFORE LEAVING
-    --------------------------------------------------------- */
+    ===================================================== */
 
     window.addEventListener(
         "pagehide",
@@ -1172,78 +1764,170 @@ async function startRootMusic() {
     );
 
 
-    /* ---------------------------------------------------------
-       INITIALIZE
-    --------------------------------------------------------- */
+    /* =====================================================
+       INITIALIZATION
+    ===================================================== */
 
-    if (isRootPage) {
+    window.addEventListener(
+        "load",
+        () => {
 
-        window.addEventListener(
-            "load",
-            () => {
+            if (isRootPage) {
+
+                /*
+                   Give the browser a moment to
+                   finish loading the page.
+                */
 
                 setTimeout(
-                    startRootMusic,
+                    attemptBirthdayAutoplay,
                     150
                 );
 
-            }
-        );
 
-    } else {
+                /*
+                   Mobile fallback.
 
-        window.addEventListener(
-            "load",
-            () => {
+                   IMPORTANT:
+                   These handlers call play()
+                   DIRECTLY.
+                */
 
-                setTimeout(
-                    startInnerPageMusic,
-                    100
+                document.addEventListener(
+                    "pointerdown",
+                    unlockBirthdayFromGesture,
+                    {
+                        passive: true
+                    }
+                );
+
+
+                document.addEventListener(
+                    "touchstart",
+                    unlockBirthdayFromGesture,
+                    {
+                        passive: true
+                    }
+                );
+
+
+                document.addEventListener(
+                    "click",
+                    unlockBirthdayFromGesture
                 );
 
             }
-        );
 
-    }
+            else {
+
+                /*
+                   Try memories automatically.
+                */
+
+                setTimeout(
+                    attemptMemoriesAutoplay,
+                    100
+                );
 
 
-    /* ---------------------------------------------------------
+                /*
+                   If mobile blocks it,
+                   first interaction unlocks it.
+                */
+
+                document.addEventListener(
+                    "pointerdown",
+                    unlockMemoriesFromGesture,
+                    {
+                        passive: true
+                    }
+                );
+
+
+                document.addEventListener(
+                    "touchstart",
+                    unlockMemoriesFromGesture,
+                    {
+                        passive: true
+                    }
+                );
+
+
+                document.addEventListener(
+                    "click",
+                    unlockMemoriesFromGesture
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
        PUBLIC API
-    --------------------------------------------------------- */
+       
+       These names are required by birthday.js,
+       developer.js and the other pages.
+    ===================================================== */
 
     window.BirthdayMusic = {
 
-        playBirthday,
+        playBirthday:
+            playBirthday,
 
-        playMemories,
 
-        resumeMemories,
+        playMemories:
+            playMemories,
 
-        playDeveloperMusic,
 
-        closeDeveloperMusic,
+        resumeMemories:
+            resumeMemories,
 
-        saveMemoryPosition,
+
+        playDeveloperMusic:
+            startDeveloperMusic,
+
+
+        closeDeveloperMusic:
+            closeDeveloperMusic,
+
+
+        saveMemoryPosition:
+            saveMemoryPosition,
+
 
         stopBirthday:
-            () =>
-                stopAudio(
-                    birthdayMusic,
-                    false
-                ),
+            () => {
+
+                hardStop(
+                    birthdayMusic
+                );
+
+            },
+
 
         stopMemories:
             () => {
 
                 saveMemoryPosition();
 
-                return stopAudio(
-                    memoriesMusic,
-                    false
+                hardStop(
+                    memoriesMusic
                 );
 
             }
 
     };
+
+
+    /* =====================================================
+       READY MESSAGE
+    ===================================================== */
+
+    console.log(
+        "HMT Music Engine loaded successfully."
+    );
+
 
 })();
